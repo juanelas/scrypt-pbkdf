@@ -38,6 +38,10 @@
     "env": [
       "mocha"
     ],
+    "globals": [
+      "crypto",
+      "BigUint64Array"
+    ],
     "ignore": [
       "/test/browser/",
       "/lib/index.browser.bundle.iife.js",
