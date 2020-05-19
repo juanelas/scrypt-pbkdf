@@ -4,9 +4,7 @@
 
 # {{PKG_NAME}}
 
-This is an example README for your project. Please rewrite to your needs. Also, check the badges and remove if desired.
-
-Don't remove the lines in section ## API reference documentation, since they are required to automatically include the API reference documentation of your module.
+*THIS PACKAGE IS NOT YET READY. I NEED TO FINISH IT FIRST*
 
 ## Installation
 
