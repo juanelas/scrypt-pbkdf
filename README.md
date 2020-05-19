@@ -62,30 +62,45 @@ YOUR JAVASCRIPT EXAMPLE CODE HERE
 
 ## API reference documentation
 
-<a name="TypedArray"></a>
+<a name="module_scrypt-bigint"></a>
 
-### TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
+### scrypt-bigint
+Native JS implementation of scrypt using BigInt and BigUint64Arrays
+
+
+* [scrypt-bigint](#module_scrypt-bigint)
+    * [~TypedArray](#module_scrypt-bigint..TypedArray) : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
+    * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-bigint..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+    * [~salsa208Core(arr)](#module_scrypt-bigint..salsa208Core)
+    * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-bigint..scrypt)
+    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix)
+    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix)
+    * [~typedArrayXor(arr1, arr2)](#module_scrypt-bigint..typedArrayXor)
+
+<a name="module_scrypt-bigint..TypedArray"></a>
+
+#### scrypt-bigint~TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
 A TypedArray object describes an array-like view of an underlying binary data buffer.
 
-**Kind**: global typedef  
-<a name="pbkdf2HmacSha256"></a>
+**Kind**: inner typedef of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+<a name="module_scrypt-bigint..pbkdf2HmacSha256"></a>
 
-### pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+#### scrypt-bigint~pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
 The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
 (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | P | <code>string</code> | A unicode string with a password |
-| S | <code>ArrayBuffer</code> \| [<code>TypedArray</code>](#TypedArray) | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
+| S | <code>ArrayBuffer</code> \| <code>TypedArray</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
 | c | <code>number</code> | iteration count, a positive integer |
 | dkLen | <code>number</code> | intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen |
 
-<a name="salsa208Core"></a>
+<a name="module_scrypt-bigint..salsa208Core"></a>
 
-### salsa208Core(arr)
+#### scrypt-bigint~salsa208Core(arr)
 Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
 hash function from 64-octet strings to 64-octet strings.  Note that
 Salsa20/8 Core is not a cryptographic hash function since it is not
@@ -93,31 +108,31 @@ collision resistant.
 
 This function modifies the ArrayBuffer of the input UInt32Array
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | arr | <code>Uint32Array</code> | a binary array of 64 octets |
 
-<a name="scrypt"></a>
+<a name="module_scrypt-bigint..scrypt"></a>
 
-### scrypt(P, S, N, r, p, dkLen)
+#### scrypt-bigint~scrypt(P, S, N, r, p, dkLen)
 The scrypt Algorithm (RFC 7914)
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | P | <code>string</code> | A unicode string with a passphrase. |
-| S | <code>ArrayBuffer</code> \| [<code>TypedArray</code>](#TypedArray) | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
+| S | <code>ArrayBuffer</code> \| <code>TypedArray</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
 | N | <code>number</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
 | r | <code>number</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
 | p | <code>number</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
 | dkLen | <code>number</code> | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
 
-<a name="scryptBlockMix"></a>
+<a name="module_scrypt-bigint..scryptBlockMix"></a>
 
-### scryptBlockMix(B)
+#### scrypt-bigint~scryptBlockMix(B)
 The scryptBlockMix algorithm is the same as the BlockMix algorithm
 described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
 Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
@@ -125,37 +140,37 @@ octet vector T.
 
 This function modifies the ArrayBuffer of the input BigInt64Array
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | B | <code>BigUint64Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
 
-<a name="scryptROMix"></a>
+<a name="module_scrypt-bigint..scryptROMix"></a>
 
-### scryptROMix(B, N)
+#### scrypt-bigint~scryptROMix(B, N)
 The scryptROMix algorithm is the same as the ROMix algorithm described in
 http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
 the hash function H and the Integerify function explained inline.
 
 This function modifies the ArrayBuffer of the input BigInt64Array
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | B | <code>BigUint64Array</code> | Input octet vector of length 128 * r octets. |
 | N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
 
-<a name="typedArrayXor"></a>
+<a name="module_scrypt-bigint..typedArrayXor"></a>
 
-### typedArrayXor(arr1, arr2)
+#### scrypt-bigint~typedArrayXor(arr1, arr2)
 XORs arr2 to arr1
 
-**Kind**: global function  
+**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
 | Param | Type |
 | --- | --- |
-| arr1 | [<code>TypedArray</code>](#TypedArray) | 
-| arr2 | [<code>TypedArray</code>](#TypedArray) | 
+| arr1 | <code>TypedArray</code> | 
+| arr2 | <code>TypedArray</code> | 
 

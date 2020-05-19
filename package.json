@@ -1,7 +1,7 @@
 {
   "name": "scrypt-bigint",
   "version": "0.9.0",
-  "description": "My package is wonderful",
+  "description": "Native JS implementation of scrypt using BigInt and BigUint64Arrays",
   "keywords": [
     "scrypt",
     "bigint",
