@@ -18,9 +18,9 @@ describe('testing scryptBlockMix', function () {
   for (const test of tests) {
     describe(`scryptBlockMix(${test.input})`, function () {
       it(`should match ${test.output}`, async function () {
-        const ret = new BigUint64Array(bigintConversion.hexToBuf(test.input, true))
-        await _pkg.scryptBlockMix(ret)
-        chai.expect(bigintConversion.bufToHex(ret)).to.equal(test.output)
+        const input = new BigUint64Array(bigintConversion.hexToBuf(test.input, true))
+        const output = await _pkg.scryptBlockMix(input)
+        chai.expect(bigintConversion.bufToHex(output)).to.equal(test.output)
       })
     })
   }

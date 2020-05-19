@@ -71,8 +71,8 @@ Native JS implementation of scrypt using BigInt and BigUint64Arrays
     * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-bigint..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
     * [~salsa208Core(arr)](#module_scrypt-bigint..salsa208Core)
     * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-bigint..scrypt)
-    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix)
-    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix)
+    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix) ⇒ <code>BigUint64Array</code>
+    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix) ⇒ <code>BigUint64Array</code>
     * [~typedArrayXor(arr1, arr2)](#module_scrypt-bigint..typedArrayXor)
 
 <a name="module_scrypt-bigint..TypedArray"></a>
@@ -91,8 +91,8 @@ The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
 
 | Param | Type | Description |
 | --- | --- | --- |
-| P | <code>string</code> | A unicode string with a password |
-| S | <code>ArrayBuffer</code> \| <code>TypedArray</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
+| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A unicode string with a password |
+| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
 | c | <code>number</code> | iteration count, a positive integer |
 | dkLen | <code>number</code> | intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen |
 
@@ -121,8 +121,8 @@ The scrypt Algorithm (RFC 7914)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| P | <code>string</code> | A unicode string with a passphrase. |
-| S | <code>ArrayBuffer</code> \| <code>TypedArray</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
+| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A unicode string with a passphrase. |
+| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
 | N | <code>number</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
 | r | <code>number</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
 | p | <code>number</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
@@ -130,13 +130,11 @@ The scrypt Algorithm (RFC 7914)
 
 <a name="module_scrypt-bigint..scryptBlockMix"></a>
 
-#### scrypt-bigint~scryptBlockMix(B)
+#### scrypt-bigint~scryptBlockMix(B) ⇒ <code>BigUint64Array</code>
 The scryptBlockMix algorithm is the same as the BlockMix algorithm
 described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
 Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
 octet vector T.
-
-This function modifies the ArrayBuffer of the input BigInt64Array
 
 **Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
@@ -146,7 +144,7 @@ This function modifies the ArrayBuffer of the input BigInt64Array
 
 <a name="module_scrypt-bigint..scryptROMix"></a>
 
-#### scrypt-bigint~scryptROMix(B, N)
+#### scrypt-bigint~scryptROMix(B, N) ⇒ <code>BigUint64Array</code>
 The scryptROMix algorithm is the same as the ROMix algorithm described in
 http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
 the hash function H and the Integerify function explained inline.
