@@ -34,7 +34,7 @@ let iifeBundle, esmBundle, workflowBadget, coverallsBadge
 if (repoProvider && repoProvider === 'github') {
   iifeBundle = `[IIFE bundle](https://raw.githubusercontent.com/${repoUsername}/${repoName}/master/lib/index.browser.bundle.iife.js)`
   esmBundle = `[ESM bundle](https://raw.githubusercontent.com/${repoUsername}/${repoName}/master/lib/index.browser.bundle.mod.js)`
-  workflowBadget = `![Node CI](https://github.com/${repoUsername}/${repoName}/workflows/Node%20CI/badge.svg)`
+  workflowBadget = `[![Node CI](https://github.com/${repoUsername}/${repoName}/workflows/Node%20CI/badge.svg)](https://github.com/${repoUsername}/${repoName}/actions?query=workflow%3A%22Node+CI%22)`
   coverallsBadge = `[![Coverage Status](https://coveralls.io/repos/github/${repoUsername}/${repoName}/badge.svg?branch=master)](https://coveralls.io/github/${repoUsername}/${repoName}?branch=master)`
 }
 
