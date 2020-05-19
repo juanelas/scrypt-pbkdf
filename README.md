@@ -1,0 +1,161 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+![Node CI](https://github.com/juanelas/scrypt-bigint/workflows/Node%20CI/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-bigint/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-bigint?branch=master)
+
+# scrypt-bigint
+
+This is an example README for your project. Please rewrite to your needs. Also, check the badges and remove if desired.
+
+Don't remove the lines in section ## API reference documentation, since they are required to automatically include the API reference documentation of your module.
+
+## Installation
+
+`scrypt-bigint` can be imported to your project with `npm`:
+
+```bash
+npm install scrypt-bigint
+```
+
+NPM installation defaults to the ES6 module for browsers and the CJS one for Node.js. For web browsers, you can also directly download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.iife.js) or the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.mod.js) from the repository.
+
+## Usage examples
+
+Import your module as :
+
+ - Node.js
+   ```javascript
+   const scryptBigint = require('scrypt-bigint')
+   ... // your code here
+   ```
+ - JavaScript native or TypeScript project (including React and Angular)
+   ```javascript
+   import * as scryptBigint from 'scrypt-bigint'
+   ... // your code here
+   ```
+ - JavaScript native browser ES module
+   ```html
+   <script type="module">
+      import * as scryptBigint from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
+      ... // your code here
+    </script>
+   ```
+ - JavaScript native browser IIFE
+   ```html
+   <head>
+     ...
+     <script src="../../lib/index.browser.bundle.iife.js"></script> <!-- Use you actual path to the browser bundle -->
+   </head>
+   <body>
+     ...
+     <script>
+       ... // your code here
+     </script>
+   </body>
+   ```
+
+An example of usage could be:
+
+```javascript
+YOUR JAVASCRIPT EXAMPLE CODE HERE
+```
+
+## API reference documentation
+
+<a name="TypedArray"></a>
+
+### TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
+A TypedArray object describes an array-like view of an underlying binary data buffer.
+
+**Kind**: global typedef  
+<a name="pbkdf2HmacSha256"></a>
+
+### pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
+(RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| P | <code>string</code> | A unicode string with a password |
+| S | <code>ArrayBuffer</code> \| [<code>TypedArray</code>](#TypedArray) | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
+| c | <code>number</code> | iteration count, a positive integer |
+| dkLen | <code>number</code> | intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen |
+
+<a name="salsa208Core"></a>
+
+### salsa208Core(arr)
+Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
+hash function from 64-octet strings to 64-octet strings.  Note that
+Salsa20/8 Core is not a cryptographic hash function since it is not
+collision resistant.
+
+This function modifies the ArrayBuffer of the input UInt32Array
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| arr | <code>Uint32Array</code> | a binary array of 64 octets |
+
+<a name="scrypt"></a>
+
+### scrypt(P, S, N, r, p, dkLen)
+The scrypt Algorithm (RFC 7914)
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| P | <code>string</code> | A unicode string with a passphrase. |
+| S | <code>ArrayBuffer</code> \| [<code>TypedArray</code>](#TypedArray) | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
+| N | <code>number</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
+| r | <code>number</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
+| p | <code>number</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
+| dkLen | <code>number</code> | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
+
+<a name="scryptBlockMix"></a>
+
+### scryptBlockMix(B)
+The scryptBlockMix algorithm is the same as the BlockMix algorithm
+described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
+Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
+octet vector T.
+
+This function modifies the ArrayBuffer of the input BigInt64Array
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| B | <code>BigUint64Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
+
+<a name="scryptROMix"></a>
+
+### scryptROMix(B, N)
+The scryptROMix algorithm is the same as the ROMix algorithm described in
+http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
+the hash function H and the Integerify function explained inline.
+
+This function modifies the ArrayBuffer of the input BigInt64Array
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| B | <code>BigUint64Array</code> | Input octet vector of length 128 * r octets. |
+| N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
+
+<a name="typedArrayXor"></a>
+
+### typedArrayXor(arr1, arr2)
+XORs arr2 to arr1
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| arr1 | [<code>TypedArray</code>](#TypedArray) | 
+| arr2 | [<code>TypedArray</code>](#TypedArray) | 
+
