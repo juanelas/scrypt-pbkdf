@@ -43,14 +43,15 @@ export function scrypt(P: string | ArrayBuffer | TypedArray | DataView, S: strin
  * Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
  * octet vector T.
  *
+ * This function modifies the ArrayBuffer of the input BigUint64Array
+ *
  * @param {BigUint64Array} B - B[0] || B[1] || ... || B[2 * r - 1]
  *                          Input octet string (of size 128 * r octets),
  *                          treated as 2 * r 64-octet blocks,
  *                          where each element in B is a 64-octet block.
  *
- * @returns {BigUint64Array}
  */
-export function scryptBlockMix(B: BigUint64Array): BigUint64Array;
+export function scryptBlockMix(B: BigUint64Array): void;
 /**
  * The scryptROMix algorithm is the same as the ROMix algorithm described in
  * http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
@@ -62,6 +63,5 @@ export function scryptBlockMix(B: BigUint64Array): BigUint64Array;
  * @param {number} N         - CPU/Memory cost parameter, must be larger than 1,
  *                             a power of 2, and less than 2^(128 * r / 8).
  *
- * @returns {BigUint64Array}
  */
-export function scryptROMix(B: BigUint64Array, N: number): BigUint64Array;
+export function scryptROMix(B: BigUint64Array, N: number): void;

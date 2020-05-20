@@ -71,8 +71,8 @@ Native JS implementation of scrypt using BigInt and BigUint64Arrays
     * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-bigint..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
     * [~salsa208Core(arr)](#module_scrypt-bigint..salsa208Core)
     * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-bigint..scrypt)
-    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix) ⇒ <code>BigUint64Array</code>
-    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix) ⇒ <code>BigUint64Array</code>
+    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix)
+    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix)
     * [~typedArrayXor(arr1, arr2)](#module_scrypt-bigint..typedArrayXor)
 
 <a name="module_scrypt-bigint..TypedArray"></a>
@@ -130,11 +130,13 @@ The scrypt Algorithm (RFC 7914)
 
 <a name="module_scrypt-bigint..scryptBlockMix"></a>
 
-#### scrypt-bigint~scryptBlockMix(B) ⇒ <code>BigUint64Array</code>
+#### scrypt-bigint~scryptBlockMix(B)
 The scryptBlockMix algorithm is the same as the BlockMix algorithm
 described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
 Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
 octet vector T.
+
+This function modifies the ArrayBuffer of the input BigUint64Array
 
 **Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
 
@@ -144,7 +146,7 @@ octet vector T.
 
 <a name="module_scrypt-bigint..scryptROMix"></a>
 
-#### scrypt-bigint~scryptROMix(B, N) ⇒ <code>BigUint64Array</code>
+#### scrypt-bigint~scryptROMix(B, N)
 The scryptROMix algorithm is the same as the ROMix algorithm described in
 http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
 the hash function H and the Integerify function explained inline.
