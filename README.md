@@ -94,7 +94,7 @@ The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
 | P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A unicode string with a password |
 | S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
 | c | <code>number</code> | iteration count, a positive integer |
-| dkLen | <code>number</code> | intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen |
+| dkLen | <code>number</code> | intended length in octets of the derived key |
 
 <a name="module_scrypt-bigint..salsa208Core"></a>
 
@@ -147,9 +147,7 @@ This function modifies the ArrayBuffer of the input BigUint64Array
 <a name="module_scrypt-bigint..scryptROMix"></a>
 
 #### scrypt-bigint~scryptROMix(B, N)
-The scryptROMix algorithm is the same as the ROMix algorithm described in
-http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as
-the hash function H and the Integerify function explained inline.
+The scryptROMix algorithm
 
 This function modifies the ArrayBuffer of the input BigInt64Array
 

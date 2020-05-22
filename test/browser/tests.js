@@ -291,6 +291,16 @@ const tests$1 = [
     output: '77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906'
   },
   {
+    // https://tools.ietf.org/html/rfc7914#section-12  #1
+    P: new ArrayBuffer(),
+    S: new TextEncoder().encode(''),
+    N: 16,
+    r: 2,
+    p: 1,
+    dkLen: 64,
+    output: '5517696d05d1df94fb42f067d9fcdb14d9effe8ac37500957e1b6f1d383ea02961accf2409bba1ae87c94c6fc69f9b32393eea0b877eb7803c2f151a888acdb6'
+  },
+  {
     // https://tools.ietf.org/html/rfc7914#section-12  #2
     P: 'password',
     S: 'NaCl',

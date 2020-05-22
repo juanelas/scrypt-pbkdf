@@ -18,6 +18,16 @@ const tests = [
     output: '77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906'
   },
   {
+    // https://tools.ietf.org/html/rfc7914#section-12  #1
+    P: new ArrayBuffer(),
+    S: new TextEncoder().encode(''),
+    N: 16,
+    r: 2,
+    p: 1,
+    dkLen: 64,
+    output: '5517696d05d1df94fb42f067d9fcdb14d9effe8ac37500957e1b6f1d383ea02961accf2409bba1ae87c94c6fc69f9b32393eea0b877eb7803c2f151a888acdb6'
+  },
+  {
     // https://tools.ietf.org/html/rfc7914#section-12  #2
     P: 'password',
     S: 'NaCl',
@@ -37,16 +47,16 @@ const tests = [
     dkLen: 64,
     output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887'
   },
-  // {
-  //   // https://tools.ietf.org/html/rfc7914#section-12  #4
-  //   P: 'pleaseletmein',
-  //   S: 'SodiumChloride',
-  //   N: 1048576,
-  //   r: 8,
-  //   p: 1,
-  //   dkLen: 64,
-  //   output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4'
-  // },
+  {
+    // https://tools.ietf.org/html/rfc7914#section-12  #4
+    P: 'pleaseletmein',
+    S: 'SodiumChloride',
+    N: 1048576,
+    r: 8,
+    p: 1,
+    dkLen: 64,
+    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4'
+  },
   {
     P: '',
     S: '',
