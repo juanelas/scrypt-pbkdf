@@ -3,6 +3,8 @@ const scrypt64 = require('../lib/index.node.64bits.test')
 const scryptsy = require('scryptsy')
 const scryptjs = require('scrypt-js')
 
+const bigintConversion = require('bigint-conversion')
+
 const Benchmark = require('benchmark')
 
 const tests = require('../test/vectors/scrypt').filter(val => (val.input.N <= 16384) && !('error' in val) && (val.comment))
@@ -12,16 +14,16 @@ for (const test of tests) {
   // add tests
   let { P, S, N, r, p, dkLen } = test.input
   if (typeof P === 'string') {
-    var Pstr = P
     P = new TextEncoder().encode(P)
   }
   if (typeof S === 'string') {
-    var Sstr = S
     S = new TextEncoder().encode(S)
   }
+  const Pstr = bigintConversion.bufToText(P)
+  const Sstr = bigintConversion.bufToText(S)
   P = new Uint8Array(P)
   S = new Uint8Array(S)
-  const testDataStr = JSON.stringify({ P, S, N, r, p, dkLen })
+  const testDataStr = JSON.stringify({ P: Pstr, S: Sstr, N, r, p, dkLen })
   suite.add(`\nInput: ${testDataStr} ${test.comment}\n  scrypt-pbkdf`, {
     defer: true,
     fn: function (deferred) {
