@@ -30124,25 +30124,25 @@ for (const test of tests) {
   P = new Uint8Array(P);
   S = new Uint8Array(S);
   const testDataStr = JSON.stringify({ P, S, N, r, p, dkLen });
-  suite.add(`\n Input: ${testDataStr} ${test.comment}\nscrypt-pbkdf`, {
+  suite.add(`\nInput: ${testDataStr} ${test.comment}\n  scrypt-pbkdf`, {
     defer: true,
     fn: function (deferred) {
       index_browser_mod.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve());
     }
   })
-    .add('scrypt-pbkdf (64 bits version)', {
+    .add('  scrypt-pbkdf (64 bits version)', {
       defer: true,
       fn: function (deferred) {
         index_browser_mod_64bits_test.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve());
       }
     })
-    .add('scrypt-js', {
+    .add('  scrypt-js', {
       defer: true,
       fn: function (deferred) {
         scrypt$2.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve());
       }
     })
-    .add('scryptsy', {
+    .add('  scryptsy', {
       defer: true,
       fn: function (deferred) {
         scryptsy.async(Pstr, Sstr, N, r, p, dkLen).then(ret => deferred.resolve());
@@ -30157,7 +30157,7 @@ suite.on('cycle', function (event) {
     console.log('Starting benchmarks for scrypt... (keep calm)');
   })
   .on('complete', function () {
-    console.log('Benchmark completed');
+    console.log('\nBenchmark completed');
   })
 // run
   .run();
