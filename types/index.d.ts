@@ -45,21 +45,21 @@ export function scrypt(P: string | ArrayBuffer | TypedArray | DataView, S: strin
  *
  * This function modifies the ArrayBuffer of the input BigUint64Array
  *
- * @param {BigUint64Array} B - B[0] || B[1] || ... || B[2 * r - 1]
+ * @param {Uint32Array} B - B[0] || B[1] || ... || B[2 * r - 1]
  *                          Input octet string (of size 128 * r octets),
  *                          treated as 2 * r 64-octet blocks,
  *                          where each element in B is a 64-octet block.
  *
  */
-export function scryptBlockMix(B: BigUint64Array): void;
+export function scryptBlockMix(B: Uint32Array): void;
 /**
  * The scryptROMix algorithm
  *
  * This function modifies the ArrayBuffer of the input BigInt64Array
  *
- * @param {BigUint64Array} B - Input octet vector of length 128 * r octets.
+ * @param {Uint32Array} B    - Input octet vector of length 128 * r octets.
  * @param {number} N         - CPU/Memory cost parameter, must be larger than 1,
  *                             a power of 2, and less than 2^(128 * r / 8).
  *
  */
-export function scryptROMix(B: BigUint64Array, N: number): void;
+export function scryptROMix(B: Uint32Array, N: number): void;

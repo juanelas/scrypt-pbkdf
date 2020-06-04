@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Benchmark</title>
+  <script src="lodash.js"></script>
+  <script src="platform.js"></script>
+  <script src="benchmark.js"></script>
+</head>
+
+<body>
+  <pre id="console"></pre>
+  <script defer>
+  console.error = console.warn = console.trace = console.info = console.log = (function (old_function, div_log) { 
+    return function (text) {
+      old_function(text)
+      div_log.innerHTML += text + '<br />'
+    }
+  } (console.log.bind(console), document.getElementById('console')))
+  </script>
+  <script src="./tests.js" defer></script>
+</body>
+
+</html>

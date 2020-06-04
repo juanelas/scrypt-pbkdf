@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>scrypt-bigint - Mocha Tests</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/7.1.2/mocha.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/7.1.2/mocha.min.js"></script>
+  <title>scrypt-parallelize - Mocha Tests</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mocha/7.2.0/mocha.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/7.2.0/mocha.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.2.0/chai.min.js"></script>
 </head>
-
 <body>
   <div id="mocha"></div>
   <script>
@@ -16,11 +14,8 @@
   </script>
 
   <script type="module">
-    import * as _pkg from '../../../lib/index.browser.mod.js'
-    window._pkg = _pkg
     import './tests.js'
     mocha.run()
   </script>
 </body>
-
 </html>

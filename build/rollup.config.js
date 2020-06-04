@@ -22,6 +22,7 @@ const pkgName = pkgJson.name
 const pkgCamelisedName = camelise(pkgName)
 
 const input = path.join(srcDir, 'js', 'index.js')
+const input64 = path.join(srcDir, 'js', 'index64.js')
 
 module.exports = [
   { // Native JS
@@ -66,6 +67,36 @@ module.exports = [
     input: input,
     output: {
       file: path.join(rootDir, pkgJson.main),
+      format: 'cjs',
+      esModule: false,
+      externalLiveBindings: false
+    },
+    plugins: [
+      replace({
+        'process.browser': false
+      })
+    ],
+    external: ['bigint-mod-arith']
+  },
+  { // Test 64 bits (BigUint64Array) browser
+    input: input64,
+    output: [
+      {
+        file: path.join(dstDir, 'index.browser.mod.64bits.test.js'),
+        format: 'es'
+      }
+    ],
+    plugins: [
+      replace({
+        'process.browser': true
+      })
+    ],
+    external: ['bigint-mod-arith']
+  },
+  { // Test Node 64 bits (BigUint64Array)
+    input: input64,
+    output: {
+      file: path.join(rootDir, 'lib/index.node.64bits.test.js'),
       format: 'cjs',
       esModule: false,
       externalLiveBindings: false

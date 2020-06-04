@@ -121,9 +121,7 @@ export function salsa208Core (arr) {
     x[15] ^= R(x[14] + x[13], 18)
   }
 
-  for (let i = 0; i < 16; i++) {
-    arr[i] = x[i] + arr[i]
-  }
+  for (let i = 0; i < 16; ++i) arr[i] = x[i] + arr[i]
 }
 
 /**
@@ -134,7 +132,7 @@ export function salsa208Core (arr) {
  *
  * This function modifies the ArrayBuffer of the input BigUint64Array
  *
- * @param {Uint32Array} B - B[0] || B[1] || ... || B[2 * r - 1]
+ * @param {BigUint64Array} B - B[0] || B[1] || ... || B[2 * r - 1]
  *                          Input octet string (of size 128 * r octets),
  *                          treated as 2 * r 64-octet blocks,
  *                          where each element in B is a 64-octet block.
@@ -146,8 +144,8 @@ export function scryptBlockMix (B) {
   /*
   1.  X = B[2 * r - 1]
   */
-  const offset32 = (2 * r - 1) * 16
-  const X = B.slice(offset32, offset32 + 16)
+  const offset64 = (2 * r - 1) * 8
+  const X = B.slice(offset64, offset64 + 8)
 
   /*
   2.  for i = 0 to 2 * r - 1 do
@@ -159,31 +157,30 @@ export function scryptBlockMix (B) {
   3.  B' = (Y[0], Y[2], ..., Y[2 * r - 2],
             Y[1], Y[3], ..., Y[2 * r - 1])
   */
-  const Yodd = new Uint32Array(B.length / 2)
+  const Yodd = new BigUint64Array(B.length / 2)
   let even = true
   for (let i = 0; i < 2 * r; i++) {
-    const offset = i * 16
-    const Bi = B.subarray(offset, offset + 16)
+    const offset = i * 8
+    const Bi = B.subarray(offset, offset + 8)
     typedArrayXor(X, Bi)
-    salsa208Core(X)
+    salsa208Core(new Uint32Array(X.buffer))
     const k = i >> 1
-    const off2 = 16 * k
     if (even) {
       // we can safely overwrite B'[0], B'[1]...B'[r-1] since they are not accessed again after overwriting them
-      for (let j = 0; j < 16; j++) {
-        B[off2 + j] = X[j]
+      for (let j = 0; j < 8; j++) {
+        B[8 * k + j] = X[j]
       }
     } else {
       // Y[1], Y[3], ..., Y[2 * r - 1] should go to the second half and therefore we can't overwrite them until the entire process is finished
-      for (let j = 0; j < 16; j++) {
-        Yodd[off2 + j] = X[j]
+      for (let j = 0; j < 8; j++) {
+        Yodd[8 * k + j] = X[j]
       }
     }
     even = !even
   }
   // Update the second half of B: Y[1], Y[3], ..., Y[2 * r - 1]
-  const halfIndex = 16 * r
-  for (let i = 0; i < halfIndex; i++) {
+  const halfIndex = 8 * r
+  for (let i = 0; i < 8 * r; i++) {
     B[halfIndex + i] = Yodd[i]
   }
 }
@@ -193,7 +190,7 @@ export function scryptBlockMix (B) {
  *
  * This function modifies the ArrayBuffer of the input BigInt64Array
  *
- * @param {Uint32Array} B    - Input octet vector of length 128 * r octets.
+ * @param {BigUint64Array} B - Input octet vector of length 128 * r octets.
  * @param {number} N         - CPU/Memory cost parameter, must be larger than 1,
  *                             a power of 2, and less than 2^(128 * r / 8).
  *
@@ -231,12 +228,13 @@ export function scryptROMix (B, N) {
         X = scryptBlockMix (T)
       end for
   */
-  function integerifyModN (Uint32arr) {
+  const Nbi = BigInt(N)
+  function integerifyModN (bigUint64arr) {
     const offset = (2 * r - 1) * 64
-    const lastBlock = new DataView(Uint32arr.buffer, offset, 64)
+    const lastBlock = new DataView(bigUint64arr.buffer, offset, 64)
 
-    // Since N is a power of 2 and assuming N <= 2**32, we can just take the first subblock (little endian) of 32 bits
-    return lastBlock.getUint32(0, true) % N
+    // Since N is a power of 2 and N <= 2**64 I can just take the first subblock (little endian) of 64 bits
+    return lastBlock.getBigUint64(0, true) % Nbi
   }
   for (let i = 0; i < N; i++) {
     const j = integerifyModN(B)
@@ -283,22 +281,22 @@ export async function scrypt (P, S, N, r, p, dkLen) {
         B[i] = scryptROMix (r, B[i], N)
       end for
   */
-  const B32 = new Uint32Array(B)
+  const B64 = new BigUint64Array(B)
   for (let i = 0; i < p; i++) {
     // TO-DO: activate web workers here!!
-    const blockLength32 = 32 * r
-    const offset = i * blockLength32
-    const Bi = B32.slice(offset, offset + blockLength32)
+    const blockLength64 = 16 * r
+    const offset = i * blockLength64
+    const Bi = B64.slice(offset, offset + blockLength64)
     scryptROMix(Bi, N)
-    for (let j = 0; j < 32 * r; j++) {
-      B32[offset + j] = Bi[j]
+    for (let j = 0; j < 16 * r; j++) {
+      B64[offset + j] = Bi[j]
     }
   }
 
   /*
   3.  DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
   */
-  const DK = await pbkdf2HmacSha256(P, B32, 1, dkLen)
+  const DK = await pbkdf2HmacSha256(P, B64, 1, dkLen)
 
   return DK
 }

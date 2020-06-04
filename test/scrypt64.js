@@ -1,6 +1,6 @@
 // Every test file (you can create as many as you want) should start like this
 // Please, do NOT touch. They will be automatically removed for browser tests -->
-const _pkg = require('../lib/index.node')
+const _pkg = require('../lib/index.node.64bits.test')
 const chai = require('chai')
 // <--
 
@@ -8,7 +8,7 @@ const bigintConversion = require('bigint-conversion')
 
 const vectors = require('./vectors/scrypt')
 
-describe('testing scrypt', function () {
+describe('testing scrypt 64 bits', function () {
   this.timeout(360000)
   for (const vector of vectors) {
     describe(`${vector.comment} : P=${vector.input.P}, S=${vector.input.S}, N=${vector.input.N}, r=${vector.input.r}, p=${vector.input.p}, dkLen=${vector.input.dkLen})`, function () {

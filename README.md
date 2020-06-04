@@ -3,16 +3,16 @@
 [![Node CI](https://github.com/juanelas/scrypt-bigint/workflows/Node%20CI/badge.svg)](https://github.com/juanelas/scrypt-bigint/actions?query=workflow%3A%22Node+CI%22)
 [![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-bigint/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-bigint?branch=master)
 
-# scrypt-bigint
+# scrypt-parallelize
 
 *THIS PACKAGE IS NOT YET READY. I NEED TO FINISH IT FIRST*
 
 ## Installation
 
-`scrypt-bigint` can be imported to your project with `npm`:
+`scrypt-parallelize` can be imported to your project with `npm`:
 
 ```bash
-npm install scrypt-bigint
+npm install scrypt-parallelize
 ```
 
 NPM installation defaults to the ES6 module for browsers and the CJS one for Node.js. For web browsers, you can also directly download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.iife.js) or the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.mod.js) from the repository.
@@ -23,18 +23,18 @@ Import your module as :
 
  - Node.js
    ```javascript
-   const scryptBigint = require('scrypt-bigint')
+   const scryptParallelize = require('scrypt-parallelize')
    ... // your code here
    ```
  - JavaScript native or TypeScript project (including React and Angular)
    ```javascript
-   import * as scryptBigint from 'scrypt-bigint'
+   import * as scryptParallelize from 'scrypt-parallelize'
    ... // your code here
    ```
  - JavaScript native browser ES module
    ```html
    <script type="module">
-      import * as scryptBigint from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
+      import * as scryptParallelize from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
       ... // your code here
     </script>
    ```
@@ -142,7 +142,7 @@ This function modifies the ArrayBuffer of the input BigUint64Array
 
 | Param | Type | Description |
 | --- | --- | --- |
-| B | <code>BigUint64Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
+| B | <code>Uint32Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
 
 <a name="module_scrypt-bigint..scryptROMix"></a>
 
@@ -155,7 +155,7 @@ This function modifies the ArrayBuffer of the input BigInt64Array
 
 | Param | Type | Description |
 | --- | --- | --- |
-| B | <code>BigUint64Array</code> | Input octet vector of length 128 * r octets. |
+| B | <code>Uint32Array</code> | Input octet vector of length 128 * r octets. |
 | N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
 
 <a name="module_scrypt-bigint..typedArrayXor"></a>

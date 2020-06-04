@@ -21,11 +21,9 @@ const dstDir = path.join(rootDir, pkgJson.directories.test, 'browser')
 const dstFileName = path.join(dstDir, 'index.html')
 
 const template = fs.readFileSync(templatePath, 'utf-8')
-const bundleFile = path.join(rootDir, pkgJson.directories.lib, 'index.browser.mod.js')
+
 const testsJs = `
   <script type="module">
-    import * as _pkg from '${path.relative(templatePath, bundleFile)}'
-    window._pkg = _pkg
     import './tests.js'
     mocha.run()
   </script>`
@@ -43,20 +41,19 @@ module.exports = [
     plugins: [
       multi({ exports: false }),
       replace({
-        'const _pkg = require(\'../lib/index.node\')': '',
+        '../lib/index.node': '../lib/index.browser.mod',
         'const chai = require(\'chai\')': '',
         delimiters: ['', ''],
         'process.browser': true
       }),
+      commonjs(),
       resolve({
         browser: true
-      }),
-      commonjs()
+      })
     ],
     output: {
-      file: path.join(rootDir, pkgJson.directories.test, 'browser', 'tests.js'),
-      format: 'esm'
-    },
-    external: [pkgName]
+      file: path.join(dstDir, 'tests.js'),
+      format: 'es'
+    }
   }
 ]

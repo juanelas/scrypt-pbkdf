@@ -1,3 +1,6 @@
+# test builds
+*.test.js
+
 # Build scripts
 build/*
 
@@ -6,6 +9,9 @@ src/*
 
 # Test files
 test/*
+
+# benchmark files
+benchmark/*
 
 # Logs
 logs
