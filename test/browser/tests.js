@@ -264,8 +264,6 @@ async function scrypt (P, S, N, r, p, dkLen) {
 
   if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
-  // if (!true) return require('crypto').scryptSync(P, S, dkLen, { N, r, p })
-
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
       B[0] || B[1] || ... || B[p - 1] = PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
@@ -1107,8 +1105,6 @@ async function scrypt$2 (P, S, N, r, p, dkLen) {
   if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blosize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
 
   if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
-
-  // if (!true) return require('crypto').scryptSync(P, S, dkLen, { N, r, p })
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:

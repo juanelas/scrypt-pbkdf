@@ -5,7 +5,7 @@ const scryptjs = require('scrypt-js')
 
 const Benchmark = require('benchmark')
 
-const tests = require('../test/vectors/scrypt').filter(val => (val.input.N <= 16384) && !('error' in val))
+const tests = require('../test/vectors/scrypt').filter(val => (val.input.N <= 16384) && !('error' in val) && (val.comment))
 
 const suite = new Benchmark.Suite('scrypt')
 for (const test of tests) {
@@ -21,32 +21,33 @@ for (const test of tests) {
   }
   P = new Uint8Array(P)
   S = new Uint8Array(S)
-  suite.add(`${test.comment}: scrypt 32 bits`, {
+  const testDataStr = JSON.stringify({ P, S, N, r, p, dkLen })
+  suite.add(`\nInput: ${testDataStr} ${test.comment}\n  scrypt-pbkdf`, {
     defer: true,
     fn: function (deferred) {
       scrypt32.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
     }
   })
-    .add(`${test.comment}: scrypt 64 bits`, {
+    .add('  scrypt-pbkdf (64 bits version)', {
       defer: true,
       fn: function (deferred) {
         scrypt64.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
       }
     })
-    .add(`${test.comment}: scryptjs`, {
+    .add('  scrypt-js', {
       defer: true,
       fn: function (deferred) {
         scryptjs.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
       }
     })
-    .add(`${test.comment}: scryptsy`, {
+    .add('  scryptsy', {
       defer: true,
       fn: function (deferred) {
         scryptsy.async(Pstr, Sstr, N, r, p, dkLen).then(ret => deferred.resolve())
       }
     })
   if (!process.browser) {
-    suite.add(`${test.comment}: node crypto's scrypt`, {
+    suite.add('  Node\'s scrypt', {
       defer: true,
       fn: function (deferred) {
         require('crypto').scrypt(P, S, dkLen, { N, r, p },
@@ -57,6 +58,9 @@ for (const test of tests) {
         )
       }
     })
+      .add('  Node\'s scryptSync', function () {
+        require('crypto').scryptSync(P, S, dkLen, { N, r, p })
+      })
   }
 }
 // add listeners
@@ -67,7 +71,7 @@ suite.on('cycle', function (event) {
     console.log('Starting benchmarks for scrypt... (keep calm)')
   })
   .on('complete', function () {
-    console.log('Benchmark completed')
+    console.log('\nBenchmark completed')
   })
 // run
   .run()
