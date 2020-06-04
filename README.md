@@ -60,34 +60,34 @@ YOUR JAVASCRIPT EXAMPLE CODE HERE
 
 ## API reference documentation
 
-<a name="module_scrypt-bigint"></a>
+<a name="module_scrypt-pbkdf"></a>
 
-### scrypt-bigint
+### scrypt-pbkdf
 Native JS implementation of scrypt using BigInt and BigUint64Arrays
 
 
-* [scrypt-bigint](#module_scrypt-bigint)
-    * [~TypedArray](#module_scrypt-bigint..TypedArray) : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
-    * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-bigint..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
-    * [~salsa208Core(arr)](#module_scrypt-bigint..salsa208Core)
-    * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-bigint..scrypt)
-    * [~scryptBlockMix(B)](#module_scrypt-bigint..scryptBlockMix)
-    * [~scryptROMix(B, N)](#module_scrypt-bigint..scryptROMix)
-    * [~typedArrayXor(arr1, arr2)](#module_scrypt-bigint..typedArrayXor)
+* [scrypt-pbkdf](#module_scrypt-pbkdf)
+    * [~TypedArray](#module_scrypt-pbkdf..TypedArray) : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
+    * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-pbkdf..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+    * [~salsa208Core(arr)](#module_scrypt-pbkdf..salsa208Core)
+    * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-pbkdf..scrypt)
+    * [~scryptBlockMix(B)](#module_scrypt-pbkdf..scryptBlockMix)
+    * [~scryptROMix(B, N)](#module_scrypt-pbkdf..scryptROMix)
+    * [~typedArrayXor(arr1, arr2)](#module_scrypt-pbkdf..typedArrayXor)
 
-<a name="module_scrypt-bigint..TypedArray"></a>
+<a name="module_scrypt-pbkdf..TypedArray"></a>
 
-#### scrypt-bigint~TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
+#### scrypt-pbkdf~TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
 A TypedArray object describes an array-like view of an underlying binary data buffer.
 
-**Kind**: inner typedef of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
-<a name="module_scrypt-bigint..pbkdf2HmacSha256"></a>
+**Kind**: inner typedef of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
+<a name="module_scrypt-pbkdf..pbkdf2HmacSha256"></a>
 
-#### scrypt-bigint~pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+#### scrypt-pbkdf~pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
 The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
 (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -96,9 +96,9 @@ The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
 | c | <code>number</code> | iteration count, a positive integer |
 | dkLen | <code>number</code> | intended length in octets of the derived key |
 
-<a name="module_scrypt-bigint..salsa208Core"></a>
+<a name="module_scrypt-pbkdf..salsa208Core"></a>
 
-#### scrypt-bigint~salsa208Core(arr)
+#### scrypt-pbkdf~salsa208Core(arr)
 Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
 hash function from 64-octet strings to 64-octet strings.  Note that
 Salsa20/8 Core is not a cryptographic hash function since it is not
@@ -106,18 +106,18 @@ collision resistant.
 
 This function modifies the ArrayBuffer of the input UInt32Array
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | arr | <code>Uint32Array</code> | a binary array of 64 octets |
 
-<a name="module_scrypt-bigint..scrypt"></a>
+<a name="module_scrypt-pbkdf..scrypt"></a>
 
-#### scrypt-bigint~scrypt(P, S, N, r, p, dkLen)
+#### scrypt-pbkdf~scrypt(P, S, N, r, p, dkLen)
 The scrypt Algorithm (RFC 7914)
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -128,9 +128,9 @@ The scrypt Algorithm (RFC 7914)
 | p | <code>number</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
 | dkLen | <code>number</code> | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
 
-<a name="module_scrypt-bigint..scryptBlockMix"></a>
+<a name="module_scrypt-pbkdf..scryptBlockMix"></a>
 
-#### scrypt-bigint~scryptBlockMix(B)
+#### scrypt-pbkdf~scryptBlockMix(B)
 The scryptBlockMix algorithm is the same as the BlockMix algorithm
 described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
 Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
@@ -138,32 +138,32 @@ octet vector T.
 
 This function modifies the ArrayBuffer of the input BigUint64Array
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | B | <code>Uint32Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
 
-<a name="module_scrypt-bigint..scryptROMix"></a>
+<a name="module_scrypt-pbkdf..scryptROMix"></a>
 
-#### scrypt-bigint~scryptROMix(B, N)
+#### scrypt-pbkdf~scryptROMix(B, N)
 The scryptROMix algorithm
 
 This function modifies the ArrayBuffer of the input BigInt64Array
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | B | <code>Uint32Array</code> | Input octet vector of length 128 * r octets. |
 | N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
 
-<a name="module_scrypt-bigint..typedArrayXor"></a>
+<a name="module_scrypt-pbkdf..typedArrayXor"></a>
 
-#### scrypt-bigint~typedArrayXor(arr1, arr2)
+#### scrypt-pbkdf~typedArrayXor(arr1, arr2)
 XORs arr2 to arr1
 
-**Kind**: inner method of [<code>scrypt-bigint</code>](#module_scrypt-bigint)  
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 
 | Param | Type |
 | --- | --- |
