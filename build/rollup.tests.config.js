@@ -1,26 +1,26 @@
 'use strict'
 
-const resolve = require('@rollup/plugin-node-resolve')
-const replace = require('@rollup/plugin-replace')
-const commonjs = require('@rollup/plugin-commonjs')
-const multi = require('@rollup/plugin-multi-entry')
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+import commonjs from '@rollup/plugin-commonjs'
+import multi from '@rollup/plugin-multi-entry'
 
-const fs = require('fs')
-const path = require('path')
-const pkgJson = require('../package.json')
-const pkgJsonLock = require('../package-lock.json')
-const mochaVersion = pkgJsonLock.dependencies.mocha.version
-const chaiVersion = pkgJsonLock.dependencies.chai.version
-const pkgName = pkgJson.name
+import { readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
+import { name, directories } from '../package.json'
+import { dependencies } from '../package-lock.json'
+const mochaVersion = dependencies.mocha.version
+const chaiVersion = dependencies.chai.version
+const pkgName = name
 
-const rootDir = path.join(__dirname, '..')
+const rootDir = join(__dirname, '..')
 
 // Let's first create the appropriate html file loading mocha, chai and a bundle of the tests
-const templatePath = path.join(rootDir, pkgJson.directories.src, 'browser', 'tests-template.html')
-const dstDir = path.join(rootDir, pkgJson.directories.test, 'browser')
-const dstFileName = path.join(dstDir, 'index.html')
+const templatePath = join(rootDir, directories.src, 'browser', 'tests-template.html')
+const dstDir = join(rootDir, directories.test, 'browser')
+const dstFileName = join(dstDir, 'index.html')
 
-const template = fs.readFileSync(templatePath, 'utf-8')
+const template = readFileSync(templatePath, 'utf-8')
 
 const testsJs = `
   <script type="module">
@@ -28,14 +28,14 @@ const testsJs = `
     mocha.run()
   </script>`
 
-fs.writeFileSync(dstFileName,
+writeFileSync(dstFileName,
   template.replace(/{{TESTS}}/g, testsJs).replace(/{{PKG_NAME}}/g, pkgName).replace(/{{MOCHA_VERSION}}/g, mochaVersion).replace(/{{CHAI_VERSION}}/g, chaiVersion)
 )
 
-const input = path.join(rootDir, pkgJson.directories.test, '*.js')
+const input = join(rootDir, directories.test, '*.js')
 console.log(input)
 
-module.exports = [
+export default [
   {
     input: input,
     plugins: [
@@ -52,7 +52,7 @@ module.exports = [
       })
     ],
     output: {
-      file: path.join(dstDir, 'tests.js'),
+      file: join(dstDir, 'tests.js'),
       format: 'es'
     }
   }

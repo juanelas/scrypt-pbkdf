@@ -1,23 +1,23 @@
 'use strict'
 
-const commonjs = require('@rollup/plugin-commonjs')
-const resolve = require('@rollup/plugin-node-resolve')
-const replace = require('@rollup/plugin-replace')
+import commonjs from '@rollup/plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
 
-const fs = require('fs')
-const path = require('path')
+import { mkdirSync, copyFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
 
-const pkgJson = require('../package.json')
+import { directories } from '../package.json'
 
-const rootDir = path.join(__dirname, '..')
-const benchmarkDir = path.join(rootDir, pkgJson.directories.benchmark)
+const rootDir = join(__dirname, '..')
+const benchmarkDir = join(rootDir, directories.benchmark)
 
-const benchmarkBrowserDir = path.join(benchmarkDir, 'browser')
-try { fs.mkdirSync(benchmarkBrowserDir) } catch {}
-fs.copyFileSync(path.join(rootDir, 'node_modules', 'benchmark', 'benchmark.js'), path.join(benchmarkBrowserDir, 'benchmark.js'))
-fs.copyFileSync(path.join(rootDir, 'node_modules', 'lodash', 'lodash.js'), path.join(benchmarkBrowserDir, 'lodash.js'))
-fs.copyFileSync(path.join(rootDir, 'node_modules', 'platform', 'platform.js'), path.join(benchmarkBrowserDir, 'platform.js'))
-fs.writeFileSync(path.join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
+const benchmarkBrowserDir = join(benchmarkDir, 'browser')
+try { mkdirSync(benchmarkBrowserDir) } catch {}
+copyFileSync(join(rootDir, 'node_modules', 'benchmark', 'benchmark.js'), join(benchmarkBrowserDir, 'benchmark.js'))
+copyFileSync(join(rootDir, 'node_modules', 'lodash', 'lodash.js'), join(benchmarkBrowserDir, 'lodash.js'))
+copyFileSync(join(rootDir, 'node_modules', 'platform', 'platform.js'), join(benchmarkBrowserDir, 'platform.js'))
+writeFileSync(join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
 <html>
 
 <head>
@@ -43,14 +43,14 @@ fs.writeFileSync(path.join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
 </html>
 `)
 
-const input = path.join(benchmarkDir, 'scrypt.js')
+const input = join(benchmarkDir, 'scrypt.js')
 
-module.exports = [
+export default [
   { // Browser bundles
     input: input,
     output: [
       {
-        file: path.join(benchmarkBrowserDir, 'tests.js'),
+        file: join(benchmarkBrowserDir, 'tests.js'),
         format: 'es'
       }
     ],

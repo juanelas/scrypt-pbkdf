@@ -1,15 +1,15 @@
 'use strict'
 
-const resolve = require('@rollup/plugin-node-resolve')
-const replace = require('@rollup/plugin-replace')
-const { terser } = require('rollup-plugin-terser')
+import resolve from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+import { terser } from 'rollup-plugin-terser'
 
-const path = require('path')
-const pkgJson = require('../package.json')
+import { join } from 'path'
+import { directories, name as _name, browser as _browser, main } from '../package.json'
 
-const rootDir = path.join(__dirname, '..')
-const srcDir = path.join(rootDir, pkgJson.directories.src)
-const dstDir = path.join(rootDir, pkgJson.directories.lib)
+const rootDir = join(__dirname, '..')
+const srcDir = join(rootDir, directories.src)
+const dstDir = join(rootDir, directories.lib)
 
 function camelise (str) {
   return str.replace(/-([a-z])/g,
@@ -18,18 +18,18 @@ function camelise (str) {
     })
 }
 
-const pkgName = pkgJson.name
+const pkgName = _name
 const pkgCamelisedName = camelise(pkgName)
 
-const input = path.join(srcDir, 'js', 'index.js')
-const input64 = path.join(srcDir, 'js', 'index64.js')
+const input = join(srcDir, 'js', 'index.js')
+const input64 = join(srcDir, 'js', 'index64.js')
 
-module.exports = [
+export default [
   { // Native JS
     input: input,
     output: [
       {
-        file: path.join(rootDir, pkgJson.browser),
+        file: join(rootDir, _browser),
         format: 'es'
       }
     ],
@@ -44,12 +44,12 @@ module.exports = [
     input: input,
     output: [
       {
-        file: path.join(dstDir, 'index.browser.bundle.iife.js'),
+        file: join(dstDir, 'index.browser.bundle.iife.js'),
         format: 'iife',
         name: pkgCamelisedName
       },
       {
-        file: path.join(dstDir, 'index.browser.bundle.mod.js'),
+        file: join(dstDir, 'index.browser.bundle.mod.js'),
         format: 'es'
       }
     ],
@@ -66,7 +66,7 @@ module.exports = [
   { // Node
     input: input,
     output: {
-      file: path.join(rootDir, pkgJson.main),
+      file: join(rootDir, main),
       format: 'cjs',
       esModule: false,
       externalLiveBindings: false
@@ -82,7 +82,7 @@ module.exports = [
     input: input64,
     output: [
       {
-        file: path.join(dstDir, 'index.browser.mod.64bits.test.js'),
+        file: join(dstDir, 'index.browser.mod.64bits.test.js'),
         format: 'es'
       }
     ],
@@ -96,7 +96,7 @@ module.exports = [
   { // Test Node 64 bits (BigUint64Array)
     input: input64,
     output: {
-      file: path.join(rootDir, 'lib/index.node.64bits.test.js'),
+      file: join(rootDir, 'lib/index.node.64bits.test.js'),
       format: 'cjs',
       esModule: false,
       externalLiveBindings: false

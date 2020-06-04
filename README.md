@@ -1,21 +1,21 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Node CI](https://github.com/juanelas/scrypt-bigint/workflows/Node%20CI/badge.svg)](https://github.com/juanelas/scrypt-bigint/actions?query=workflow%3A%22Node+CI%22)
-[![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-bigint/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-bigint?branch=master)
+[![Node CI](https://github.com/juanelas/scrypt-pbkdf/workflows/Node%20CI/badge.svg)](https://github.com/juanelas/scrypt-pbkdf/actions?query=workflow%3A%22Node+CI%22)
+[![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-pbkdf/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-pbkdf?branch=master)
 
-# scrypt-parallelize
+# scrypt-pbkdf
 
 *THIS PACKAGE IS NOT YET READY. I NEED TO FINISH IT FIRST*
 
 ## Installation
 
-`scrypt-parallelize` can be imported to your project with `npm`:
+`scrypt-pbkdf` can be imported to your project with `npm`:
 
 ```bash
-npm install scrypt-parallelize
+npm install scrypt-pbkdf
 ```
 
-NPM installation defaults to the ES6 module for browsers and the CJS one for Node.js. For web browsers, you can also directly download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.iife.js) or the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-bigint/master/lib/index.browser.bundle.mod.js) from the repository.
+NPM installation defaults to the ES6 module for browsers and the CJS one for Node.js. For web browsers, you can also directly download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/lib/index.browser.bundle.iife.js) or the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/lib/index.browser.bundle.mod.js) from the repository.
 
 ## Usage examples
 
@@ -23,18 +23,18 @@ Import your module as :
 
  - Node.js
    ```javascript
-   const scryptParallelize = require('scrypt-parallelize')
+   const scryptPbkdf = require('scrypt-pbkdf')
    ... // your code here
    ```
  - JavaScript native or TypeScript project (including React and Angular)
    ```javascript
-   import * as scryptParallelize from 'scrypt-parallelize'
+   import * as scryptPbkdf from 'scrypt-pbkdf'
    ... // your code here
    ```
  - JavaScript native browser ES module
    ```html
    <script type="module">
-      import * as scryptParallelize from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
+      import * as scryptPbkdf from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
       ... // your code here
     </script>
    ```
