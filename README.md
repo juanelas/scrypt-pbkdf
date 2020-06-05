@@ -63,7 +63,7 @@ YOUR JAVASCRIPT EXAMPLE CODE HERE
 <a name="module_scrypt-pbkdf"></a>
 
 ### scrypt-pbkdf
-Native JS implementation of scrypt using BigInt and BigUint64Arrays
+Scrypt password-based key derivation function (RFC 7914)
 
 
 * [scrypt-pbkdf](#module_scrypt-pbkdf)

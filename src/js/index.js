@@ -1,5 +1,5 @@
 /**
- * Native JS implementation of scrypt using BigInt and BigUint64Arrays
+ * Scrypt password-based key derivation function (RFC 7914)
  * @module scrypt-pbkdf
  */
 
