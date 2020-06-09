@@ -83,7 +83,7 @@ Import your module as :
 An example of usage could be (from an async function):
 
 ```javascript
-YOUR JAVASCRIPT EXAMPLE CODE HERE
+await scryptPbkdf.scrypt('password', 'salt', 1024, 8, 16, 32)
 ```
 
 ## API reference documentation
