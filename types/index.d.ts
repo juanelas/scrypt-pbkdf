@@ -3,18 +3,6 @@
  */
 export type TypedArray = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array | BigInt64Array | BigUint64Array;
 /**
- * The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
- * (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
- *
- * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a password
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16))
- * @param {number} c - iteration count, a positive integer
- * @param {number} dkLen - intended length in octets of the derived key
- *
- * @returns {Promise<ArrayBuffer>}
- */
-export function pbkdf2HmacSha256(P: string | ArrayBuffer | TypedArray | DataView, S: string | ArrayBuffer | TypedArray | DataView, c: number, dkLen: number): Promise<ArrayBuffer>;
-/**
  * Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
  * hash function from 64-octet strings to 64-octet strings.  Note that
  * Salsa20/8 Core is not a cryptographic hash function since it is not

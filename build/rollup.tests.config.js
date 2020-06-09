@@ -39,13 +39,13 @@ export default [
   {
     input: input,
     plugins: [
-      multi({ exports: false }),
       replace({
         '../lib/index.node': '../lib/index.browser.mod',
         'const chai = require(\'chai\')': '',
         delimiters: ['', ''],
         'process.browser': true
       }),
+      multi({ exports: false }),
       commonjs(),
       resolve({
         browser: true

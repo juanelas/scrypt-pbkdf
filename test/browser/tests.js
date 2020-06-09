@@ -1,4 +1,210 @@
 /**
+ * PBKDF2 following RFC 2898 using HMAC (with SHA-1, SHA-256, SHA-384, SHA-512) as the PRF
+ * @module pbkdf2-hmac
+ */
+
+/**
+ * A TypedArray object describes an array-like view of an underlying binary data buffer.
+ * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array|BigInt64Array|BigUint64Array} TypedArray
+ */
+
+const HASHALGS = { // length in octets of the output of the chosen PRF
+  'SHA-1': { outputLength: 20, blockSize: 64 },
+  'SHA-256': { outputLength: 32, blockSize: 64 },
+  'SHA-384': { outputLength: 48, blockSize: 128 },
+  'SHA-512': { outputLength: 64, blockSize: 128 }
+};
+
+/**
+ * The PBKDF2-HMAC function used below denotes the PBKDF2 algorithm (RFC2898)
+ * used with one of the SHA algorithms as the hash function for the HMAC
+ *
+ * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a password
+ * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16))
+ * @param {number} c - iteration count, a positive integer
+ * @param {number} dkLen - intended length in octets of the derived key
+ * @param {string} hash - hash function to use for the HMAC. One of 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'
+ *
+ * @returns {Promise<ArrayBuffer>}
+ */
+function pbkdf2Hmac (P, S, c, dkLen, hash = 'SHA-256') {
+  return new Promise((resolve, reject) => {
+    if (!(hash in HASHALGS)) {
+      reject(new RangeError(`Valid hash algorithm values are any of ${Object.keys(HASHALGS)}`));
+    }
+
+    if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
+    else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
+    else if (!ArrayBuffer.isView(P)) reject(RangeError('P should be string, ArrayBuffer, TypedArray, DataView'));
+
+    if (typeof S === 'string') S = new TextEncoder().encode(S); // encode S as UTF-8
+    else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
+    else if (!ArrayBuffer.isView(S)) reject(RangeError('S should be string, ArrayBuffer, TypedArray, DataView'));
+
+    /* eslint-disable no-lone-blocks */
+    {
+      crypto.subtle.importKey('raw', P, 'PBKDF2', false, ['deriveBits']).then(
+        PKey => {
+          const params = { name: 'PBKDF2', hash: hash, salt: S, iterations: c }; // pbkdf2 params
+          crypto.subtle.deriveBits(params, PKey, dkLen * 8).then(
+            derivedKey => resolve(derivedKey),
+            // eslint-disable-next-line handle-callback-err
+            err => {
+              // Try our native implementation if browser's native one fails (firefox one fails when dkLen > 256)
+              _pbkdf2(P, S, c, dkLen, hash).then(
+                derivedKey => resolve(derivedKey),
+                error => reject(error)
+              );
+            }
+          );
+        },
+        err => reject(err)
+      );
+    }
+    /* eslint-enable no-lone-blocks */
+  })
+}
+
+async function _pbkdf2 (P, S, c, dkLen, hash) {
+  if (!(hash in HASHALGS)) {
+    throw new RangeError(`Valid hash algorithm values are any of ${Object.keys(HASHALGS)}`)
+  }
+
+  if (!Number.isInteger(c) || c <= 0) throw new RangeError('c must be a positive integer')
+
+  /*
+  1.  If dkLen > (2^32 - 1) * hLen, output "derived key too long"
+          and stop.
+  */
+  const hLen = HASHALGS[hash].outputLength;
+  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen >= (2 ** 32 - 1) * hLen) throw new RangeError('dkLen must be a positive integer < (2 ** 32 - 1) * hLen')
+
+  /*
+  2.  Let l be the number of hLen-octet blocks in the derived key,
+      rounding up, and let r be the number of octets in the last
+      block:
+        l = CEIL (dkLen / hLen)
+        r = dkLen - (l - 1) * hLen
+  */
+  const l = Math.ceil(dkLen / hLen);
+  const r = dkLen - (l - 1) * hLen;
+
+  /*
+  3.  For each block of the derived key apply the function F defined
+      below to the password P, the salt S, the iteration count c,
+      and the block index to compute the block:
+
+                T_1 = F (P, S, c, 1) ,
+                T_2 = F (P, S, c, 2) ,
+                ...
+                T_l = F (P, S, c, l) ,
+  */
+  const T = new Array(l);
+
+  if (P.length === 0) P = new Uint8Array(HASHALGS[hash].blockSize); // HMAC does not accept an empty ArrayVecor
+
+  P = await crypto.subtle.importKey(
+    'raw',
+    P,
+    {
+      name: 'HMAC',
+      hash: { name: hash }
+    },
+    true,
+    ['sign']
+  );
+
+  const HMAC = async function (key, arr) {
+    const hmac = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      arr
+    );
+    return new Uint8Array(hmac)
+  };
+  for (let i = 0; i < l; i++) {
+    T[i] = await F(P, S, c, i + 1);
+  }
+  /*
+      where the function F is defined as the exclusive-or sum of the
+      first c iterates of the underlying pseudorandom function PRF
+      applied to the password P and the concatenation of the salt S
+      and the block index i:
+
+                F (P, S, c, i) = U_1 \xor U_2 \xor ... \xor U_c
+
+      where
+                U_1 = PRF (P, S || INT (i)) ,
+                U_2 = PRF (P, U_1) ,
+                ...
+                U_c = PRF (P, U_{c-1}) .
+
+      Here, INT (i) is a four-octet encoding of the integer i, most
+      significant octet first.
+  */
+  /**
+   *
+   * @param {Uint8Array | CryptoKey} P - password
+   * @param {Uint8Array} S - salt
+   * @param {number} c - iterations
+   * @param {number} i - block index
+   */
+  async function F (P, S, c, i) {
+    function INT (i) {
+      const buf = new ArrayBuffer(4);
+      const view = new DataView(buf);
+      view.setUint32(0, i, false);
+      return new Uint8Array(buf)
+    }
+
+    const Uacc = await HMAC(P, concat(S, INT(i)));
+    let UjMinus1 = Uacc;
+    for (let j = 1; j < c; j++) {
+      UjMinus1 = await HMAC(P, UjMinus1);
+      xorMe(Uacc, UjMinus1);
+    }
+
+    return Uacc
+  }
+
+  /*
+  4.  Concatenate the blocks and extract the first dkLen octets to
+      produce a derived key DK:
+                DK = T_1 || T_2 ||  ...  || T_l<0..r-1>
+
+  5.  Output the derived key DK.
+  */
+  T[l - 1] = T[l - 1].slice(0, r);
+
+  return concat(...T).buffer
+}
+
+function concat (...arrs) {
+  // sum of individual array lengths
+  const totalLength = arrs.reduce((acc, value) => acc + value.length, 0);
+
+  if (!arrs.length) throw new RangeError('Cannot concat no arrays')
+
+  const result = new Uint8Array(totalLength);
+
+  // for each array - copy it over result
+  // next array is copied right after the previous one
+  let length = 0;
+  for (const array of arrs) {
+    result.set(array, length);
+    length += array.length;
+  }
+
+  return result
+}
+
+function xorMe (arr1, arr2) {
+  for (let i = 0; i < arr1.length; i++) {
+    arr1[i] ^= arr2[i];
+  }
+}
+
+/**
  * Scrypt password-based key derivation function (RFC 7914)
  * @module scrypt-pbkdf
  */
@@ -19,47 +225,6 @@ function typedArrayXor (arr1, arr2) {
   for (let i = 0; i < arr1.length; i++) {
     arr1[i] ^= arr2[i];
   }
-}
-
-/**
- * The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
- * (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
- *
- * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a password
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16))
- * @param {number} c - iteration count, a positive integer
- * @param {number} dkLen - intended length in octets of the derived key
- *
- * @returns {Promise<ArrayBuffer>}
- */
-function pbkdf2HmacSha256 (P, S, c, dkLen) {
-  if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
-  else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
-  else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (typeof S === 'string') S = new TextEncoder().encode(S); // encode S as UTF-8
-  else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
-  else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (!Number.isInteger(c) || c <= 0) throw RangeError('c must be a positive integer')
-  if (!Number.isInteger(dkLen) || dkLen <= 0) throw RangeError('dkLen must be a positive integer')
-
-  return new Promise((resolve, reject) => {
-    /* eslint-disable no-lone-blocks */
-    {
-      crypto.subtle.importKey('raw', P, 'PBKDF2', false, ['deriveBits']).then(
-        PKey => {
-          const params = { name: 'PBKDF2', hash: 'SHA-256', salt: S, iterations: c }; // pbkdf2 params
-          crypto.subtle.deriveBits(params, PKey, dkLen * 8).then(
-            derivedKey => resolve(derivedKey),
-            err => reject(err)
-          );
-        },
-        err => reject(err)
-      );
-    }
-    /* eslint-enable no-lone-blocks */
-  })
 }
 
 /**
@@ -260,7 +425,7 @@ async function scrypt (P, S, N, r, p, dkLen) {
 
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
-  if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blosize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
+  if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
 
   if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
@@ -268,7 +433,7 @@ async function scrypt (P, S, N, r, p, dkLen) {
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
       B[0] || B[1] || ... || B[p - 1] = PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
   */
-  const B = await pbkdf2HmacSha256(P, S, 1, p * 128 * r);
+  const B = await pbkdf2Hmac(P, S, 1, p * 128 * r);
 
   /*
   2.  for i = 0 to p - 1 do
@@ -290,14 +455,13 @@ async function scrypt (P, S, N, r, p, dkLen) {
   /*
   3.  DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
   */
-  const DK = await pbkdf2HmacSha256(P, B32, 1, dkLen);
+  const DK = await pbkdf2Hmac(P, B32, 1, dkLen);
 
   return DK
 }
 
 var index_browser_mod = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  pbkdf2HmacSha256: pbkdf2HmacSha256,
   salsa208Core: salsa208Core,
   scrypt: scrypt,
   scryptBlockMix: scryptBlockMix,
@@ -462,104 +626,6 @@ var index_browser_mod$1 = /*#__PURE__*/Object.freeze({
   hexToBuf: hexToBuf,
   textToBigint: textToBigint,
   textToBuf: textToBuf
-});
-
-var pbkdf2HmacSha256$1 = [
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-11 #1',
-    P: 'passwd',
-    S: 'salt',
-    c: 1,
-    dkLen: 64,
-    output: '55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317c71b845b1e30bd509112041d3a19783'
-  },
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-11 #2',
-    P: 'Password',
-    S: 'NaCl',
-    c: 80000,
-    dkLen: 64,
-    output: '4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176a272bdebba1d078478f62b397f33c8d'
-  },
-  {
-    comment: 'http://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors/5136918#5136918 #1',
-    P: new TextEncoder().encode('password'),
-    S: 'salt',
-    c: 1,
-    dkLen: 32,
-    output: '120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b'
-  },
-  {
-    comment: 'http://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors/5136918#5136918 #2',
-    P: 'password',
-    S: new TextEncoder().encode('salt'),
-    c: 2,
-    dkLen: 32,
-    output: 'ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43'
-  },
-  {
-    comment: 'http://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors/5136918#5136918 #3',
-    P: 'password',
-    S: new TextEncoder().encode('salt'),
-    c: 4096,
-    dkLen: 32,
-    output: 'c5e478d59288c841aa530db6845c4c8d962893a001ce4e11a4963873aa98134a'
-  },
-  {
-    comment: 'http://stackoverflow.com/questions/5130513/pbkdf2-hmac-sha2-test-vectors/5136918#5136918 #5',
-    P: 'passwordPASSWORDpassword',
-    S: new TextEncoder().encode('saltSALTsaltSALTsaltSALTsaltSALTsalt'),
-    c: 4096,
-    dkLen: 40,
-    output: '348c89dbcbd32b2f32d814b8116e84cf2b17347ebc1800181c4e2a1fb8dd53e1c635518c7dac47e9'
-  },
-  {
-    P: new ArrayBuffer(),
-    S: new TextEncoder().encode('salt'),
-    c: 1024,
-    dkLen: 32,
-    output: '9e83f279c040f2a11aa4a02b24c418f2d3cb39560c9627fa4f47e3bcc2897c3d'
-  },
-  {
-    P: 'password',
-    S: new ArrayBuffer(),
-    c: 1024,
-    dkLen: 32,
-    output: 'ea5808411eb0c7e830deab55096cee582761e22a9bc034e3ece925225b07bf46'
-  }
-];
-
-// Every test file (you can create as many as you want) should start like this
-// Please, do NOT touch. They will be automatically removed for browser tests -->
-
-
-// <--
-
-
-
-
-
-describe('testing pbkdf2HmacSha256', function () {
-  this.timeout(360000);
-  for (const vector of pbkdf2HmacSha256$1) {
-    describe(`${vector.comment} : P=${vector.P}, S=${vector.S}, c=${vector.c}, dkLen=${vector.dkLen})`, function () {
-      if ('error' in vector) {
-        it(`should be rejected because of ${vector.error}`, async function () {
-          try {
-            await index_browser_mod.pbkdf2HmacSha256(vector.P, vector.S, vector.c, vector.dkLen);
-            throw new Error('should have failed')
-          } catch (err) {
-            chai.expect(err).to.be.instanceOf(vector.error);
-          }
-        });
-      } else {
-        it(`should match ${vector.output}`, async function () {
-          const ret = await index_browser_mod.pbkdf2HmacSha256(vector.P, vector.S, vector.c, vector.dkLen);
-          chai.expect(index_browser_mod$1.bufToHex(ret)).to.equal(vector.output);
-        });
-      }
-    });
-  }
 });
 
 var salsa208Core$1 = [
@@ -842,344 +908,7 @@ describe('testing scrypt', function () {
   }
 });
 
-/**
- * Native JS implementation of scrypt using BigInt and BigUint64Arrays
- * @module scrypt-bigint
- */
-
-/**
- * A TypedArray object describes an array-like view of an underlying binary data buffer.
- * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array|BigInt64Array|BigUint64Array} TypedArray
- */
-
-/**
- * XORs arr2 to arr1
- *
- * @param {TypedArray} arr1
- * @param {TypedArray} arr2
- *
- */
-function typedArrayXor$1 (arr1, arr2) {
-  for (let i = 0; i < arr1.length; i++) {
-    arr1[i] ^= arr2[i];
-  }
-}
-
-/**
- * The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
- * (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
- *
- * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a password
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16))
- * @param {number} c - iteration count, a positive integer
- * @param {number} dkLen - intended length in octets of the derived key
- *
- * @returns {Promise<ArrayBuffer>}
- */
-function pbkdf2HmacSha256$2 (P, S, c, dkLen) {
-  if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
-  else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
-  else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (typeof S === 'string') S = new TextEncoder().encode(S); // encode S as UTF-8
-  else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
-  else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (!Number.isInteger(c) || c <= 0) throw RangeError('c must be a positive integer')
-  if (!Number.isInteger(dkLen) || dkLen <= 0) throw RangeError('dkLen must be a positive integer')
-
-  return new Promise((resolve, reject) => {
-    /* eslint-disable no-lone-blocks */
-    {
-      crypto.subtle.importKey('raw', P, 'PBKDF2', false, ['deriveBits']).then(
-        PKey => {
-          const params = { name: 'PBKDF2', hash: 'SHA-256', salt: S, iterations: c }; // pbkdf2 params
-          crypto.subtle.deriveBits(params, PKey, dkLen * 8).then(
-            derivedKey => resolve(derivedKey),
-            err => reject(err)
-          );
-        },
-        err => reject(err)
-      );
-    }
-    /* eslint-enable no-lone-blocks */
-  })
-}
-
-/**
- * Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
- * hash function from 64-octet strings to 64-octet strings.  Note that
- * Salsa20/8 Core is not a cryptographic hash function since it is not
- * collision resistant.
- *
- * This function modifies the ArrayBuffer of the input UInt32Array
- *
- * @param {Uint32Array} arr - a binary array of 64 octets
- *
-  */
-function salsa208Core$2 (arr) {
-  function R (a, b) {
-    return (a << b) | (a >>> (32 - b))
-  }
-
-  const x = arr.slice(0);
-
-  for (let i = 8; i > 0; i -= 2) {
-    x[4] ^= R(x[0] + x[12], 7);
-    x[8] ^= R(x[4] + x[0], 9);
-    x[12] ^= R(x[8] + x[4], 13);
-    x[0] ^= R(x[12] + x[8], 18);
-    x[9] ^= R(x[5] + x[1], 7);
-    x[13] ^= R(x[9] + x[5], 9);
-    x[1] ^= R(x[13] + x[9], 13);
-    x[5] ^= R(x[1] + x[13], 18);
-    x[14] ^= R(x[10] + x[6], 7);
-    x[2] ^= R(x[14] + x[10], 9);
-    x[6] ^= R(x[2] + x[14], 13);
-    x[10] ^= R(x[6] + x[2], 18);
-    x[3] ^= R(x[15] + x[11], 7);
-    x[7] ^= R(x[3] + x[15], 9);
-    x[11] ^= R(x[7] + x[3], 13);
-    x[15] ^= R(x[11] + x[7], 18);
-    x[1] ^= R(x[0] + x[3], 7);
-    x[2] ^= R(x[1] + x[0], 9);
-    x[3] ^= R(x[2] + x[1], 13);
-    x[0] ^= R(x[3] + x[2], 18);
-    x[6] ^= R(x[5] + x[4], 7);
-    x[7] ^= R(x[6] + x[5], 9);
-    x[4] ^= R(x[7] + x[6], 13);
-    x[5] ^= R(x[4] + x[7], 18);
-    x[11] ^= R(x[10] + x[9], 7);
-    x[8] ^= R(x[11] + x[10], 9);
-    x[9] ^= R(x[8] + x[11], 13);
-    x[10] ^= R(x[9] + x[8], 18);
-    x[12] ^= R(x[15] + x[14], 7);
-    x[13] ^= R(x[12] + x[15], 9);
-    x[14] ^= R(x[13] + x[12], 13);
-    x[15] ^= R(x[14] + x[13], 18);
-  }
-
-  for (let i = 0; i < 16; ++i) arr[i] = x[i] + arr[i];
-}
-
-/**
- * The scryptBlockMix algorithm is the same as the BlockMix algorithm
- * described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
- * Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
- * octet vector T.
- *
- * This function modifies the ArrayBuffer of the input BigUint64Array
- *
- * @param {BigUint64Array} B - B[0] || B[1] || ... || B[2 * r - 1]
- *                          Input octet string (of size 128 * r octets),
- *                          treated as 2 * r 64-octet blocks,
- *                          where each element in B is a 64-octet block.
- *
- */
-function scryptBlockMix$1 (B) {
-  const r = B.byteLength / 128; // block size parameter
-
-  /*
-  1.  X = B[2 * r - 1]
-  */
-  const offset64 = (2 * r - 1) * 8;
-  const X = B.slice(offset64, offset64 + 8);
-
-  /*
-  2.  for i = 0 to 2 * r - 1 do
-        T = X xor B[i]
-        X = Salsa (T)
-        Y[i] = X
-      end for
-
-  3.  B' = (Y[0], Y[2], ..., Y[2 * r - 2],
-            Y[1], Y[3], ..., Y[2 * r - 1])
-  */
-  const Yodd = new BigUint64Array(B.length / 2);
-  let even = true;
-  for (let i = 0; i < 2 * r; i++) {
-    const offset = i * 8;
-    const Bi = B.subarray(offset, offset + 8);
-    typedArrayXor$1(X, Bi);
-    salsa208Core$2(new Uint32Array(X.buffer));
-    const k = i >> 1;
-    if (even) {
-      // we can safely overwrite B'[0], B'[1]...B'[r-1] since they are not accessed again after overwriting them
-      for (let j = 0; j < 8; j++) {
-        B[8 * k + j] = X[j];
-      }
-    } else {
-      // Y[1], Y[3], ..., Y[2 * r - 1] should go to the second half and therefore we can't overwrite them until the entire process is finished
-      for (let j = 0; j < 8; j++) {
-        Yodd[8 * k + j] = X[j];
-      }
-    }
-    even = !even;
-  }
-  // Update the second half of B: Y[1], Y[3], ..., Y[2 * r - 1]
-  const halfIndex = 8 * r;
-  for (let i = 0; i < 8 * r; i++) {
-    B[halfIndex + i] = Yodd[i];
-  }
-}
-
-/**
- * The scryptROMix algorithm
- *
- * This function modifies the ArrayBuffer of the input BigInt64Array
- *
- * @param {BigUint64Array} B - Input octet vector of length 128 * r octets.
- * @param {number} N         - CPU/Memory cost parameter, must be larger than 1,
- *                             a power of 2, and less than 2^(128 * r / 8).
- *
- */
-function scryptROMix$1 (B, N) {
-  /*
-  The scryptROMix algorithm is the same as the ROMix algorithm described in
-  http://www.tarsnap.com/scrypt/scrypt.pdf but with scryptBlockMix used as the
-  hash function H and the Integerify function explained inline.
-  */
-  const r = B.byteLength / 128;
-  /*
-  1.  X = B
-  */
-
-  /*
-  2.  for i = 0 to N - 1 do
-        V[i] = X
-        X = scryptBlockMix (X)
-      end for
-  */
-  const V = new Array(N);
-  for (let i = 0; i < N; i++) {
-    V[i] = B.slice(0);
-    scryptBlockMix$1(B);
-  }
-
-  /*
-  3.  for i = 0 to N - 1 do
-        j = Integerify (X) mod N
-                where Integerify (B[0] ... B[2 * r - 1]) is defined
-                as the result of interpreting B[2 * r - 1] as a
-                little-endian integer.
-        T = X xor V[j]
-        X = scryptBlockMix (T)
-      end for
-  */
-  const Nbi = BigInt(N);
-  function integerifyModN (bigUint64arr) {
-    const offset = (2 * r - 1) * 64;
-    const lastBlock = new DataView(bigUint64arr.buffer, offset, 64);
-
-    // Since N is a power of 2 and N <= 2**64 I can just take the first subblock (little endian) of 64 bits
-    return lastBlock.getBigUint64(0, true) % Nbi
-  }
-  for (let i = 0; i < N; i++) {
-    const j = integerifyModN(B);
-    typedArrayXor$1(B, V[j]);
-    scryptBlockMix$1(B);
-  }
-}
-
-/**
- * The scrypt Algorithm (RFC 7914)
- *
- * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a passphrase.
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)).
- * @param {number} N - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
- * @param {number} r - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
- * @param {number} p - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
- * @param {number} dkLen - Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.
- */
-async function scrypt$2 (P, S, N, r, p, dkLen) {
-  if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
-  else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
-  else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (typeof S === 'string') S = new TextEncoder().encode(S); // encode S as UTF-8
-  else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
-  else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
-
-  if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blosize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
-
-  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
-
-  /*
-  1.  Initialize an array B consisting of p blocks of 128 * r octets each:
-      B[0] || B[1] || ... || B[p - 1] = PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
-  */
-  const B = await pbkdf2HmacSha256$2(P, S, 1, p * 128 * r);
-
-  /*
-  2.  for i = 0 to p - 1 do
-        B[i] = scryptROMix (r, B[i], N)
-      end for
-  */
-  const B64 = new BigUint64Array(B);
-  for (let i = 0; i < p; i++) {
-    // TO-DO: activate web workers here!!
-    const blockLength64 = 16 * r;
-    const offset = i * blockLength64;
-    const Bi = B64.slice(offset, offset + blockLength64);
-    scryptROMix$1(Bi, N);
-    for (let j = 0; j < 16 * r; j++) {
-      B64[offset + j] = Bi[j];
-    }
-  }
-
-  /*
-  3.  DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
-  */
-  const DK = await pbkdf2HmacSha256$2(P, B64, 1, dkLen);
-
-  return DK
-}
-
-var index_browser_mod_64bits_test = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  pbkdf2HmacSha256: pbkdf2HmacSha256$2,
-  salsa208Core: salsa208Core$2,
-  scrypt: scrypt$2,
-  scryptBlockMix: scryptBlockMix$1,
-  scryptROMix: scryptROMix$1
-});
-
-// Every test file (you can create as many as you want) should start like this
-// Please, do NOT touch. They will be automatically removed for browser tests -->
-
-
-// <--
-
-
-
-
-
-describe('testing scrypt 64 bits', function () {
-  this.timeout(360000);
-  for (const vector of scrypt$1) {
-    describe(`${vector.comment} : P=${vector.input.P}, S=${vector.input.S}, N=${vector.input.N}, r=${vector.input.r}, p=${vector.input.p}, dkLen=${vector.input.dkLen})`, function () {
-      if ('error' in vector) {
-        it(`should be rejected because of ${vector.error}`, async function () {
-          try {
-            await index_browser_mod_64bits_test.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen);
-            throw new Error('should have failed')
-          } catch (err) {
-            chai.expect(err).to.be.instanceOf(vector.error);
-          }
-        });
-      } else {
-        it(`should match ${vector.output}`, async function () {
-          const ret = await index_browser_mod_64bits_test.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen);
-          chai.expect(index_browser_mod$1.bufToHex(ret)).to.equal(vector.output);
-        });
-      }
-    });
-  }
-});
-
-var scryptBlockMix$2 = [
+var scryptBlockMix$1 = [
   {
     comment: 'https://tools.ietf.org/html/rfc7914#section-9',
     input: {
@@ -1201,7 +930,7 @@ var scryptBlockMix$2 = [
 
 describe('testing scryptBlockMix', function () {
   this.timeout(360000);
-  for (const vector of scryptBlockMix$2) {
+  for (const vector of scryptBlockMix$1) {
     describe(`${vector.comment} : B=${vector.input.B}`, function () {
       const B = new Uint32Array(index_browser_mod$1.hexToBuf(vector.input.B, true));
       if ('error' in vector) {
@@ -1223,7 +952,7 @@ describe('testing scryptBlockMix', function () {
   }
 });
 
-var scryptROMix$2 = [
+var scryptROMix$1 = [
   {
     comment: 'https://tools.ietf.org/html/rfc7914#section-10',
     input: {
@@ -1246,7 +975,7 @@ var scryptROMix$2 = [
 
 describe('testing scryptROMix', function () {
   this.timeout(360000);
-  for (const vector of scryptROMix$2) {
+  for (const vector of scryptROMix$1) {
     describe(`${vector.comment} : B=${vector.input.B}, N=${vector.input.N}`, function () {
       const B = new Uint32Array(index_browser_mod$1.hexToBuf(vector.input.B, true));
       if ('error' in vector) {

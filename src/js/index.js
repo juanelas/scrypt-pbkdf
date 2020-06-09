@@ -3,6 +3,8 @@
  * @module scrypt-pbkdf
  */
 
+import pbkdf2Hmac from 'pbkdf2-hmac'
+
 /**
  * A TypedArray object describes an array-like view of an underlying binary data buffer.
  * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array|BigInt64Array|BigUint64Array} TypedArray
@@ -19,53 +21,6 @@ function typedArrayXor (arr1, arr2) {
   for (let i = 0; i < arr1.length; i++) {
     arr1[i] ^= arr2[i]
   }
-}
-
-/**
- * The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
- * (RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
- *
- * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a password
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16))
- * @param {number} c - iteration count, a positive integer
- * @param {number} dkLen - intended length in octets of the derived key
- *
- * @returns {Promise<ArrayBuffer>}
- */
-export function pbkdf2HmacSha256 (P, S, c, dkLen) {
-  if (typeof P === 'string') P = new TextEncoder().encode(P) // encode S as UTF-8
-  else if (P instanceof ArrayBuffer) P = new Uint8Array(P)
-  else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (typeof S === 'string') S = new TextEncoder().encode(S) // encode S as UTF-8
-  else if (S instanceof ArrayBuffer) S = new Uint8Array(S)
-  else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
-
-  if (!Number.isInteger(c) || c <= 0) throw RangeError('c must be a positive integer')
-  if (!Number.isInteger(dkLen) || dkLen <= 0) throw RangeError('dkLen must be a positive integer')
-
-  return new Promise((resolve, reject) => {
-    /* eslint-disable no-lone-blocks */
-    if (process.browser) {
-      crypto.subtle.importKey('raw', P, 'PBKDF2', false, ['deriveBits']).then(
-        PKey => {
-          const params = { name: 'PBKDF2', hash: 'SHA-256', salt: S, iterations: c } // pbkdf2 params
-          crypto.subtle.deriveBits(params, PKey, dkLen * 8).then(
-            derivedKey => resolve(derivedKey),
-            err => reject(err)
-          )
-        },
-        err => reject(err)
-      )
-    } else {
-      const crypto = require('crypto')
-      crypto.pbkdf2(P, S, c, dkLen, 'sha256', (err, derivedKey) => {
-        if (err) reject(err)
-        else resolve(derivedKey.buffer)
-      })
-    }
-    /* eslint-enable no-lone-blocks */
-  })
 }
 
 /**
@@ -266,17 +221,17 @@ export async function scrypt (P, S, N, r, p, dkLen) {
 
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
-  if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blosize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
+  if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
 
   if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
-  if (!process.browser) return require('crypto').scryptSync(P, S, dkLen, { N, r, p })
+  if (!process.browser) return require('crypto').scryptSync(P, S, dkLen, { N, r, p, maxmem: 256 * N * r })
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
       B[0] || B[1] || ... || B[p - 1] = PBKDF2-HMAC-SHA256 (P, S, 1, p * 128 * r)
   */
-  const B = await pbkdf2HmacSha256(P, S, 1, p * 128 * r)
+  const B = await pbkdf2Hmac(P, S, 1, p * 128 * r)
 
   /*
   2.  for i = 0 to p - 1 do
@@ -298,7 +253,7 @@ export async function scrypt (P, S, N, r, p, dkLen) {
   /*
   3.  DK = PBKDF2-HMAC-SHA256 (P, B[0] || B[1] || ... || B[p - 1], 1, dkLen)
   */
-  const DK = await pbkdf2HmacSha256(P, B32, 1, dkLen)
+  const DK = await pbkdf2Hmac(P, B32, 1, dkLen)
 
   return DK
 }

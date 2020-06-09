@@ -5,7 +5,35 @@
 
 # scrypt-pbkdf
 
-*THIS PACKAGE IS NOT YET READY. I NEED TO FINISH IT FIRST*
+A faster JS implementation of the scrypt password-based key derivation function
+
+## Why another scrypt package
+
+**Efficiency and speed**.
+
+The following are benchmarks obtained with the [test vectors defined in the RFC](https://tools.ietf.org/html/rfc7914#section-12) with Chrome 83 Linux 64 bits. The comparisson is similar in Firefox.
+
+```
+Input: {"P":"","S":"","N":16,"r":1,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #1
+  scrypt-pbkdf x 4,692 ops/sec ±5.19% (53 runs sampled)
+  scrypt-js x 8,821 ops/sec ±3.04% (59 runs sampled)
+  scryptsy x 90.03 ops/sec ±2.28% (48 runs sampled)
+
+Input: {"P":"password","S":"NaCl","N":1024,"r":8,"p":16,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #2
+  scrypt-pbkdf x 3.08 ops/sec ±0.71% (20 runs sampled)
+  scrypt-js x 0.50 ops/sec ±4.78% (7 runs sampled)
+  scryptsy x 1.13 ops/sec ±0.54% (10 runs sampled)
+
+Input: {"P":"pleaseletmein","S":"SodiumChloride","N":16384,"r":8,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #3
+  scrypt-pbkdf x 2.89 ops/sec ±1.52% (19 runs sampled)
+  scrypt-js x 0.53 ops/sec ±9.85% (7 runs sampled)
+  scryptsy x 1.27 ops/sec ±0.66% (11 runs sampled)
+
+Input: {"P":"pleaseletmein","S":"SodiumChloride","N":1048576,"r":8,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #4
+  scrypt-pbkdf x 0.04 ops/sec ±1.25% (5 runs sampled)
+  scrypt-js x 0.01 ops/sec ±3.21% (5 runs sampled)
+  scryptsy x 0.02 ops/sec ±0.74% (5 runs sampled)
+```
 
 ## Installation
 
@@ -28,21 +56,21 @@ Import your module as :
    ```
  - JavaScript native or TypeScript project (including React and Angular)
    ```javascript
-   import * as scryptPbkdf from 'scrypt-pbkdf'
+   import scryptPbkdf from 'scrypt-pbkdf'
    ... // your code here
    ```
  - JavaScript native browser ES module
    ```html
    <script type="module">
-      import * as scryptPbkdf from 'lib/index.browser.bundle.mod.js'  // Use you actual path to the broser mod bundle
+      import scryptPbkdf from 'lib/index.browser.bundle.mod.js'  // Use your actual path to the broser mod bundle
       ... // your code here
-    </script>
+   </script>
    ```
  - JavaScript native browser IIFE
    ```html
    <head>
      ...
-     <script src="../../lib/index.browser.bundle.iife.js"></script> <!-- Use you actual path to the browser bundle -->
+     <script src="../../lib/index.browser.bundle.iife.js"></script> <!-- Use your actual path to the browser bundle -->
    </head>
    <body>
      ...
@@ -52,7 +80,7 @@ Import your module as :
    </body>
    ```
 
-An example of usage could be:
+An example of usage could be (from an async function):
 
 ```javascript
 YOUR JAVASCRIPT EXAMPLE CODE HERE
@@ -68,7 +96,6 @@ Scrypt password-based key derivation function (RFC 7914)
 
 * [scrypt-pbkdf](#module_scrypt-pbkdf)
     * [~TypedArray](#module_scrypt-pbkdf..TypedArray) : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
-    * [~pbkdf2HmacSha256(P, S, c, dkLen)](#module_scrypt-pbkdf..pbkdf2HmacSha256) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
     * [~salsa208Core(arr)](#module_scrypt-pbkdf..salsa208Core)
     * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-pbkdf..scrypt)
     * [~scryptBlockMix(B)](#module_scrypt-pbkdf..scryptBlockMix)
@@ -81,21 +108,6 @@ Scrypt password-based key derivation function (RFC 7914)
 A TypedArray object describes an array-like view of an underlying binary data buffer.
 
 **Kind**: inner typedef of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-<a name="module_scrypt-pbkdf..pbkdf2HmacSha256"></a>
-
-#### scrypt-pbkdf~pbkdf2HmacSha256(P, S, c, dkLen) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
-The PBKDF2-HMAC-SHA-256 function used below denotes the PBKDF2 algorithm
-(RFC2898) used with HMAC-SHA-256 as the Pseudorandom Function (PRF)
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A unicode string with a password |
-| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) |
-| c | <code>number</code> | iteration count, a positive integer |
-| dkLen | <code>number</code> | intended length in octets of the derived key |
-
 <a name="module_scrypt-pbkdf..salsa208Core"></a>
 
 #### scrypt-pbkdf~salsa208Core(arr)

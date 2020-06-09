@@ -1,5 +1,4 @@
 const scrypt32 = require('../lib/index.node')
-const scrypt64 = require('../lib/index.node.64bits.test')
 const scryptsy = require('scryptsy')
 const scryptjs = require('scrypt-js')
 
@@ -7,7 +6,7 @@ const bigintConversion = require('bigint-conversion')
 
 const Benchmark = require('benchmark')
 
-const tests = require('../test/vectors/scrypt').filter(val => (val.input.N <= 16384) && !('error' in val) && (val.comment))
+const tests = require('../test/vectors/scrypt').filter(val => !('error' in val) && (val.comment))
 
 const suite = new Benchmark.Suite('scrypt')
 for (const test of tests) {
@@ -30,12 +29,6 @@ for (const test of tests) {
       scrypt32.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
     }
   })
-    .add('  scrypt-pbkdf (64 bits version)', {
-      defer: true,
-      fn: function (deferred) {
-        scrypt64.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
-      }
-    })
     .add('  scrypt-js', {
       defer: true,
       fn: function (deferred) {

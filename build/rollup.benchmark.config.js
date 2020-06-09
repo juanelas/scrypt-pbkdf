@@ -28,7 +28,7 @@ writeFileSync(join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
 </head>
 
 <body>
-  <pre id="console"></pre>
+  <pre id="console" style="white-space: pre-wrap;"></pre>
   <script defer>
   console.error = console.warn = console.trace = console.info = console.log = (function (old_function, div_log) { 
     return function (text) {

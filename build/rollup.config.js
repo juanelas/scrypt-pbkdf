@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser'
 
 import { join } from 'path'
 import { directories, name as _name, browser as _browser, main } from '../package.json'
+import ignore from 'rollup-plugin-ignore'
 
 const rootDir = join(__dirname, '..')
 const srcDir = join(rootDir, directories.src)
@@ -22,7 +23,6 @@ const pkgName = _name
 const pkgCamelisedName = camelise(pkgName)
 
 const input = join(srcDir, 'js', 'index.js')
-const input64 = join(srcDir, 'js', 'index64.js')
 
 export default [
   { // Native JS
@@ -38,7 +38,7 @@ export default [
         'process.browser': true
       })
     ],
-    external: ['bigint-mod-arith']
+    external: ['pbkdf2-hmac']
   },
   { // Browser bundles
     input: input,
@@ -74,38 +74,8 @@ export default [
     plugins: [
       replace({
         'process.browser': false
-      })
-    ],
-    external: ['bigint-mod-arith']
-  },
-  { // Test 64 bits (BigUint64Array) browser
-    input: input64,
-    output: [
-      {
-        file: join(dstDir, 'index.browser.mod.64bits.test.js'),
-        format: 'es'
-      }
-    ],
-    plugins: [
-      replace({
-        'process.browser': true
-      })
-    ],
-    external: ['bigint-mod-arith']
-  },
-  { // Test Node 64 bits (BigUint64Array)
-    input: input64,
-    output: {
-      file: join(rootDir, 'lib/index.node.64bits.test.js'),
-      format: 'cjs',
-      esModule: false,
-      externalLiveBindings: false
-    },
-    plugins: [
-      replace({
-        'process.browser': false
-      })
-    ],
-    external: ['bigint-mod-arith']
+      }),
+      ignore(['pbkdf2-hmac'])
+    ]
   }
 ]
