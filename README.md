@@ -95,19 +95,11 @@ Scrypt password-based key derivation function (RFC 7914)
 
 
 * [scrypt-pbkdf](#module_scrypt-pbkdf)
-    * [~TypedArray](#module_scrypt-pbkdf..TypedArray) : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
     * [~salsa208Core(arr)](#module_scrypt-pbkdf..salsa208Core)
     * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-pbkdf..scrypt)
     * [~scryptBlockMix(B)](#module_scrypt-pbkdf..scryptBlockMix)
     * [~scryptROMix(B, N)](#module_scrypt-pbkdf..scryptROMix)
-    * [~typedArrayXor(arr1, arr2)](#module_scrypt-pbkdf..typedArrayXor)
 
-<a name="module_scrypt-pbkdf..TypedArray"></a>
-
-#### scrypt-pbkdf~TypedArray : <code>Int8Array</code> \| <code>Uint8Array</code> \| <code>Uint8ClampedArray</code> \| <code>Int16Array</code> \| <code>Uint16Array</code> \| <code>Int32Array</code> \| <code>Uint32Array</code> \| <code>Float32Array</code> \| <code>Float64Array</code> \| <code>BigInt64Array</code> \| <code>BigUint64Array</code>
-A TypedArray object describes an array-like view of an underlying binary data buffer.
-
-**Kind**: inner typedef of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
 <a name="module_scrypt-pbkdf..salsa208Core"></a>
 
 #### scrypt-pbkdf~salsa208Core(arr)
@@ -169,16 +161,4 @@ This function modifies the ArrayBuffer of the input BigInt64Array
 | --- | --- | --- |
 | B | <code>Uint32Array</code> | Input octet vector of length 128 * r octets. |
 | N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
-
-<a name="module_scrypt-pbkdf..typedArrayXor"></a>
-
-#### scrypt-pbkdf~typedArrayXor(arr1, arr2)
-XORs arr2 to arr1
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-
-| Param | Type |
-| --- | --- |
-| arr1 | <code>TypedArray</code> | 
-| arr2 | <code>TypedArray</code> | 
 

@@ -212,11 +212,12 @@ function xorMe (arr1, arr2) {
 /**
  * A TypedArray object describes an array-like view of an underlying binary data buffer.
  * @typedef {Int8Array|Uint8Array|Uint8ClampedArray|Int16Array|Uint16Array|Int32Array|Uint32Array|Float32Array|Float64Array|BigInt64Array|BigUint64Array} TypedArray
+ * @private
  */
 
 /**
  * XORs arr2 to arr1
- *
+ * @private
  * @param {TypedArray} arr1
  * @param {TypedArray} arr2
  *
