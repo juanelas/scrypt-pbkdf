@@ -36,7 +36,7 @@ The following table summarizes benchmarks obtained with [Benchmark.js](https://b
 
 You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
 
-Benchmarks for node are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf2`
+Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance shoudl be the same as the Node's `crypto.scrypt()`.
 
 ## Installation
 
@@ -176,9 +176,8 @@ The scrypt Algorithm (RFC 7914)
 
 #### scrypt-pbkdf~scryptBlockMix(B)
 The scryptBlockMix algorithm is the same as the BlockMix algorithm
-described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
-Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
-octet vector T.
+described in the original scrypt paper but with Salsa20/8 Core used as
+the hash function.
 
 This function modifies the ArrayBuffer of the input BigUint64Array
 

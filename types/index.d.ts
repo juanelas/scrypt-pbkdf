@@ -50,9 +50,8 @@ export function scrypt(P: string | ArrayBuffer | TypedArray | DataView, S: strin
 }): ArrayBuffer;
 /**
  * The scryptBlockMix algorithm is the same as the BlockMix algorithm
- * described in [SCRYPT] but with Salsa20/8 Core used as the hash function H.
- * Below, Salsa(T) corresponds to the Salsa20/8 Core function applied to the
- * octet vector T.
+ * described in the original scrypt paper but with Salsa20/8 Core used as
+ * the hash function.
  *
  * This function modifies the ArrayBuffer of the input BigUint64Array
  *

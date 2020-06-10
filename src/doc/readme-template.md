@@ -35,7 +35,7 @@ The following table summarizes benchmarks obtained with [Benchmark.js](https://b
 
 You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
 
-Benchmarks for node are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf2`
+Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance shoudl be the same as the Node's `crypto.scrypt()`.
 
 ## Installation
 
