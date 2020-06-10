@@ -216,19 +216,6 @@ function xorMe (arr1, arr2) {
  */
 
 /**
- * XORs arr2 to arr1
- * @private
- * @param {TypedArray} arr1
- * @param {TypedArray} arr2
- *
- */
-function typedArrayXor (arr1, arr2) {
-  for (let i = 0; i < arr1.length; i++) {
-    arr1[i] ^= arr2[i];
-  }
-}
-
-/**
  * Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
  * hash function from 64-octet strings to 64-octet strings.  Note that
  * Salsa20/8 Core is not a cryptographic hash function since it is not
@@ -409,13 +396,16 @@ function scryptROMix (B, N) {
  * The scrypt Algorithm (RFC 7914)
  *
  * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a passphrase.
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)).
- * @param {number} N - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
- * @param {number} r - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
- * @param {number} p - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js
  * @param {number} dkLen - Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.
+ * @param {Object} [scryptParams]
+ * @param {number} [scryptParams.N=131072] - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
+ * @param {number} [scryptParams.r=8] - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
+ * @param {number} [scryptParams.p=1] - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ *
+ * @returns {ArrayBuffer} - a derived key of dKLen bytes
  */
-async function scrypt (P, S, N, r, p, dkLen) {
+async function scrypt (P, S, dkLen, scryptParams = {}) {
   if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
   else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
   else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
@@ -424,11 +414,16 @@ async function scrypt (P, S, N, r, p, dkLen) {
   else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
   else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
 
+  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
+
+  let { N, r, p } = scryptParams;
+  N = (N === undefined) ? 131072 : N;
+  r = (r === undefined) ? 8 : r;
+  p = (p === undefined) ? 1 : p;
+
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
   if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
-
-  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
@@ -461,9 +456,37 @@ async function scrypt (P, S, N, r, p, dkLen) {
   return DK
 }
 
+/**
+ * Returns an ArrayBuffer of the desired length in bytes filled with cryptographically secure random bytes
+ * @param {number} [length=16] - The length in bytes of the random salt
+ * @throws {RangeError} length must be integer >= 0
+ * @returns {ArrayBuffer}
+ */
+function salt (length = 16) {
+  if (!Number.isInteger(length) || length < 0) throw new RangeError('length must be integer >= 0')
+
+  if (length === 0) return new ArrayBuffer()
+
+  return crypto.getRandomValues(new Uint8Array(length)).buffer
+}
+
+/**
+ * XORs arr2 to arr1
+ * @private
+ * @param {TypedArray} arr1
+ * @param {TypedArray} arr2
+ *
+ */
+function typedArrayXor (arr1, arr2) {
+  for (let i = 0; i < arr1.length; i++) {
+    arr1[i] ^= arr2[i];
+  }
+}
+
 var index_browser_mod = /*#__PURE__*/Object.freeze({
   __proto__: null,
   salsa208Core: salsa208Core,
+  salt: salt,
   scrypt: scrypt,
   scryptBlockMix: scryptBlockMix,
   scryptROMix: scryptROMix
@@ -29925,230 +29948,36 @@ var index_browser_mod$1 = /*#__PURE__*/Object.freeze({
   textToBuf: textToBuf
 });
 
-var scrypt$2 = [
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #1',
-    input: {
-      P: new ArrayBuffer(),
-      S: new TextEncoder().encode(''),
-      N: 16,
-      r: 1,
-      p: 1,
-      dkLen: 64
-    },
-    output: '77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906'
-  },
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #2',
-    input: {
-      P: 'password',
-      S: 'NaCl',
-      N: 1024,
-      r: 8,
-      p: 16,
-      dkLen: 64
-    },
-    output: 'fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640'
-  },
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #3',
-    input: {
-      P: new TextEncoder().encode('pleaseletmein'),
-      S: 'SodiumChloride',
-      N: 16384,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887'
-  },
-  {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #4',
-    input: {
-      P: 'pleaseletmein',
-      S: 'SodiumChloride',
-      N: 1048576,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4'
-  },
-  {
-    comment: '',
-    input: {
-      P: new ArrayBuffer(),
-      S: new TextEncoder().encode(''),
-      N: 16,
-      r: 2,
-      p: 1,
-      dkLen: 64
-    },
-    output: '5517696d05d1df94fb42f067d9fcdb14d9effe8ac37500957e1b6f1d383ea02961accf2409bba1ae87c94c6fc69f9b32393eea0b877eb7803c2f151a888acdb6'
-  },
-  {
-    comment: '',
-    input: {
-      P: '',
-      S: '',
-      N: 1024,
-      r: 8,
-      p: 16,
-      dkLen: 64
-    },
-    output: '7dd38537d71e6ae3a01205a801e3a6720ac1aa1aae0c32b8d583cc5e8c9a87e4a42eeac837ea1fec04f55d1c54057343b4b2c060e6996ff213a130563525ae88'
-  },
-  {
-    comment: '',
-    input: {
-      P: new ArrayBuffer(),
-      S: '',
-      N: 1024,
-      r: 1,
-      p: 16,
-      dkLen: 64
-    },
-    output: '0ba777e97ce849e631ea66c9c4d6762b04f9c8db865dad34f13de6947981d9b25b3dccc4d0a75c1b0230df22c179ae392dc867d798b11091cfc1cf06978b7c84'
-  },
-  {
-    comment: '',
-    input: {
-      P: '',
-      S: new ArrayBuffer(),
-      N: 1024,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '225009a832a3041c158e2ab8913019a27674c604d704a38ad1c7b58401a88b213b2a374d65016b82231fc469caf5b02134c8f52941d185e4b1d51fab0996eb46'
-  },
-  {
-    comment: 'invalid N = 15',
-    input: {
-      P: new ArrayBuffer(),
-      S: new TextEncoder().encode(''),
-      N: 15,
-      r: 1,
-      p: 1,
-      dkLen: 64
-    },
-    output: '77d6576238657b203b19ca42c18a0497f16b4844e3074ae8dfdffa3fede21442fcd0069ded0948f8326a753a0fc81f17e8d3e0fb2e0d3628cf35e20c38d18906',
-    error: RangeError
-  },
-  {
-    comment: 'invalid dkLen = 0',
-    input: {
-      P: 'password',
-      S: 'NaCl',
-      N: 1024,
-      r: 8,
-      p: 16,
-      dkLen: 0
-    },
-    output: 'fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640',
-    error: RangeError
-  },
-  {
-    comment: 'invalid dkLen < 0',
-    input: {
-      P: new TextEncoder().encode('pleaseletmein'),
-      S: 'SodiumChloride',
-      N: 16384,
-      r: 8,
-      p: 1,
-      dkLen: -1
-    },
-    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887',
-    error: RangeError
-  },
-  {
-    comment: 'invalid r = 8.2',
-    input: {
-      P: '',
-      S: '',
-      N: 1024,
-      r: 8.2,
-      p: 16,
-      dkLen: 64
-    },
-    output: '7dd38537d71e6ae3a01205a801e3a6720ac1aa1aae0c32b8d583cc5e8c9a87e4a42eeac837ea1fec04f55d1c54057343b4b2c060e6996ff213a130563525ae88',
-    error: RangeError
-  },
-  {
-    comment: 'invalid p = 16.1',
-    input: {
-      P: new ArrayBuffer(),
-      S: '',
-      N: 1024,
-      r: 1,
-      p: 16.1,
-      dkLen: 64
-    },
-    output: '0ba777e97ce849e631ea66c9c4d6762b04f9c8db865dad34f13de6947981d9b25b3dccc4d0a75c1b0230df22c179ae392dc867d798b11091cfc1cf06978b7c84',
-    error: RangeError
-  },
-  {
-    comment: 'invalid N = 0',
-    input: {
-      P: '',
-      S: new ArrayBuffer(),
-      N: 0,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '225009a832a3041c158e2ab8913019a27674c604d704a38ad1c7b58401a88b213b2a374d65016b82231fc469caf5b02134c8f52941d185e4b1d51fab0996eb46',
-    error: RangeError
-  },
-  {
-    comment: 'invalid password (entered as integer)',
-    input: {
-      P: 1234,
-      S: new ArrayBuffer(),
-      N: 1024,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '225009a832a3041c158e2ab8913019a27674c604d704a38ad1c7b58401a88b213b2a374d65016b82231fc469caf5b02134c8f52941d185e4b1d51fab0996eb46',
-    error: RangeError
-  },
-  {
-    comment: 'invalid salt (entered as integer)',
-    input: {
-      P: '',
-      S: 1234,
-      N: 1024,
-      r: 8,
-      p: 1,
-      dkLen: 64
-    },
-    output: '225009a832a3041c158e2ab8913019a27674c604d704a38ad1c7b58401a88b213b2a374d65016b82231fc469caf5b02134c8f52941d185e4b1d51fab0996eb46',
-    error: RangeError
-  }
-];
-
-const tests = scrypt$2.filter(val => !('error' in val) && (val.comment));
+const test = {
+  P: new TextEncoder().encode('pleaseletmein'),
+  S: 'SodiumChloride',
+  r: 8,
+  p: 1,
+  dkLen: 64
+};
 
 const suite = new Benchmark.Suite('scrypt');
-for (const test of tests) {
+
+let { P, S, r, p, dkLen } = test;
+if (typeof P === 'string') {
+  P = new TextEncoder().encode(P);
+}
+if (typeof S === 'string') {
+  S = new TextEncoder().encode(S);
+}
+const Pstr = index_browser_mod$1.bufToText(P);
+const Sstr = index_browser_mod$1.bufToText(S);
+P = new Uint8Array(P);
+S = new Uint8Array(S);
+
+const limit = 2 ** 20;
+for (let N = 2 ** 12; N <= limit; N <<= 1) {
   // add tests
-  let { P, S, N, r, p, dkLen } = test.input;
-  if (typeof P === 'string') {
-    P = new TextEncoder().encode(P);
-  }
-  if (typeof S === 'string') {
-    S = new TextEncoder().encode(S);
-  }
-  const Pstr = index_browser_mod$1.bufToText(P);
-  const Sstr = index_browser_mod$1.bufToText(S);
-  P = new Uint8Array(P);
-  S = new Uint8Array(S);
   const testDataStr = JSON.stringify({ P: Pstr, S: Sstr, N, r, p, dkLen });
-  suite.add(`\nInput: ${testDataStr} ${test.comment}\n  scrypt-pbkdf`, {
+  suite.add(`\nInput: ${testDataStr}\n  scrypt-pbkdf`, {
     defer: true,
     fn: function (deferred) {
-      index_browser_mod.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve());
+      index_browser_mod.scrypt(P, S, dkLen, { N, r, p }).then(ret => deferred.resolve());
     }
   })
     .add('  scrypt-js', {
@@ -30164,12 +29993,13 @@ for (const test of tests) {
       }
     });
 }
+
 // add listeners
 suite.on('cycle', function (event) {
-  console.log(String(event.target));
+  console.log(`${event.target.name} — mean time: ${(event.target.stats.mean * 1000).toFixed(0)}ms ±${(100 * event.target.stats.deviation / event.target.stats.mean).toFixed(2)}% (${event.target.stats.sample.length} runs sampled)`);
 })
   .on('start', function () {
-    console.log('Starting benchmarks for scrypt... (keep calm)');
+    console.log('Starting benchmarks for scrypt... (keep calm). The rule of thumb is to use r=8, p=1 and choose N as the highest power of 2 that allows to derive a key in less than:\n  - 100ms for interactive login\n  - 5s for file encryption');
   })
   .on('complete', function () {
     console.log('\nBenchmark completed');

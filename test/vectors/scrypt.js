@@ -24,7 +24,7 @@ module.exports = [
     output: 'fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640'
   },
   {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #3',
+    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #3\nRecommended parameters for interactive login as of 2009 ("check what you can run within 100 ms")',
     input: {
       P: new TextEncoder().encode('pleaseletmein'),
       S: 'SodiumChloride',
@@ -33,10 +33,11 @@ module.exports = [
       p: 1,
       dkLen: 64
     },
-    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887'
+    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887',
+    benchmark: true
   },
   {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #4',
+    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #4\nRecommended parameters for file encryption as of 2009 ("check what you can run within 5 s")',
     input: {
       P: 'pleaseletmein',
       S: 'SodiumChloride',
@@ -45,7 +46,32 @@ module.exports = [
       p: 1,
       dkLen: 64
     },
-    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4'
+    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4',
+    benchmark: true
+  },
+  {
+    comment: 'Recommended parameters for interactive login as of 2020? ("check what you can run within 100 ms")',
+    input: {
+      P: 'pleaseletmein',
+      S: 'SodiumChloride',
+      N: 32768,
+      r: 8,
+      p: 1,
+      dkLen: 64
+    },
+    output: 'f72cbc204bdcfc3ff5b115d8508aec1566ff0ef3f658388601a3933078ef7ac8198154d9cdb167f8c1cbf22b25eb4934e2c8a98dd8e1a4cbf0c31d2f961a7f22'
+  },
+  {
+    comment: '',
+    input: {
+      P: 'pleaseletmein',
+      S: 'SodiumChloride',
+      N: 131072,
+      r: 8,
+      p: 1,
+      dkLen: 64
+    },
+    output: '2f10fcda14532d6543334cd899776407ff0ae879c370372de5b4e39d4d2d21edcd5d7f191f94407a6f2e8a2430a1258f2e653c55e40531318baafdda82c60cd4'
   },
   {
     comment: '',

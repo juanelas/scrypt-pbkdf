@@ -12,19 +12,6 @@ import pbkdf2Hmac from 'pbkdf2-hmac'
  */
 
 /**
- * XORs arr2 to arr1
- * @private
- * @param {TypedArray} arr1
- * @param {TypedArray} arr2
- *
- */
-function typedArrayXor (arr1, arr2) {
-  for (let i = 0; i < arr1.length; i++) {
-    arr1[i] ^= arr2[i]
-  }
-}
-
-/**
  * Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
  * hash function from 64-octet strings to 64-octet strings.  Note that
  * Salsa20/8 Core is not a cryptographic hash function since it is not
@@ -205,13 +192,16 @@ export function scryptROMix (B, N) {
  * The scrypt Algorithm (RFC 7914)
  *
  * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a passphrase.
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)).
- * @param {number} N - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
- * @param {number} r - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
- * @param {number} p - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js
  * @param {number} dkLen - Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.
+ * @param {Object} [scryptParams]
+ * @param {number} [scryptParams.N=131072] - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
+ * @param {number} [scryptParams.r=8] - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
+ * @param {number} [scryptParams.p=1] - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ *
+ * @returns {ArrayBuffer} - a derived key of dKLen bytes
  */
-export async function scrypt (P, S, N, r, p, dkLen) {
+export async function scrypt (P, S, dkLen, scryptParams = {}) {
   if (typeof P === 'string') P = new TextEncoder().encode(P) // encode S as UTF-8
   else if (P instanceof ArrayBuffer) P = new Uint8Array(P)
   else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
@@ -220,13 +210,18 @@ export async function scrypt (P, S, N, r, p, dkLen) {
   else if (S instanceof ArrayBuffer) S = new Uint8Array(S)
   else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
 
+  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
+
+  let { N, r, p } = scryptParams
+  N = (N === undefined) ? 131072 : N
+  r = (r === undefined) ? 8 : r
+  p = (p === undefined) ? 1 : p
+
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
   if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
 
-  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
-
-  if (!process.browser) return require('crypto').scryptSync(P, S, dkLen, { N, r, p, maxmem: 256 * N * r })
+  if (!process.browser) return require('crypto').scryptSync(P, S, dkLen, { N, r, p, maxmem: 256 * N * r }).buffer
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
@@ -257,4 +252,32 @@ export async function scrypt (P, S, N, r, p, dkLen) {
   const DK = await pbkdf2Hmac(P, B32, 1, dkLen)
 
   return DK
+}
+
+/**
+ * Returns an ArrayBuffer of the desired length in bytes filled with cryptographically secure random bytes
+ * @param {number} [length=16] - The length in bytes of the random salt
+ * @throws {RangeError} length must be integer >= 0
+ * @returns {ArrayBuffer}
+ */
+export function salt (length = 16) {
+  if (!Number.isInteger(length) || length < 0) throw new RangeError('length must be integer >= 0')
+
+  if (length === 0) return new ArrayBuffer()
+
+  if (process.browser) return crypto.getRandomValues(new Uint8Array(length)).buffer
+  else return require('crypto').randomBytes(length).buffer
+}
+
+/**
+ * XORs arr2 to arr1
+ * @private
+ * @param {TypedArray} arr1
+ * @param {TypedArray} arr2
+ *
+ */
+function typedArrayXor (arr1, arr2) {
+  for (let i = 0; i < arr1.length; i++) {
+    arr1[i] ^= arr2[i]
+  }
 }

@@ -15,7 +15,7 @@ describe('testing scrypt', function () {
       if ('error' in vector) {
         it(`should be rejected because of ${vector.error}`, async function () {
           try {
-            await _pkg.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen)
+            await _pkg.scrypt(vector.input.P, vector.input.S, vector.input.dkLen, { N: vector.input.N, r: vector.input.r, p: vector.input.p })
             throw new Error('should have failed')
           } catch (err) {
             chai.expect(err).to.be.instanceOf(vector.error)
@@ -23,9 +23,15 @@ describe('testing scrypt', function () {
         })
       } else {
         it(`should match ${vector.output}`, async function () {
-          const ret = await _pkg.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen)
+          const ret = await _pkg.scrypt(vector.input.P, vector.input.S, vector.input.dkLen, { N: vector.input.N, r: vector.input.r, p: vector.input.p })
           chai.expect(bigintConversion.bufToHex(ret)).to.equal(vector.output)
         })
+        if (vector.input.N === 131072 && vector.input.r === 8 && vector.input.p === 1) {
+          it(`should also match ${vector.output} calling scrypt with default scryptParams`, async function () {
+            const ret = await _pkg.scrypt(vector.input.P, vector.input.S, vector.input.dkLen)
+            chai.expect(bigintConversion.bufToHex(ret)).to.equal(vector.output)
+          })
+        }
       }
     })
   }

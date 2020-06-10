@@ -216,19 +216,6 @@ function xorMe (arr1, arr2) {
  */
 
 /**
- * XORs arr2 to arr1
- * @private
- * @param {TypedArray} arr1
- * @param {TypedArray} arr2
- *
- */
-function typedArrayXor (arr1, arr2) {
-  for (let i = 0; i < arr1.length; i++) {
-    arr1[i] ^= arr2[i];
-  }
-}
-
-/**
  * Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
  * hash function from 64-octet strings to 64-octet strings.  Note that
  * Salsa20/8 Core is not a cryptographic hash function since it is not
@@ -409,13 +396,16 @@ function scryptROMix (B, N) {
  * The scrypt Algorithm (RFC 7914)
  *
  * @param {string | ArrayBuffer | TypedArray | DataView} P - A unicode string with a passphrase.
- * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)).
- * @param {number} N - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
- * @param {number} r - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
- * @param {number} p - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ * @param {string | ArrayBuffer | TypedArray | DataView} S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js
  * @param {number} dkLen - Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.
+ * @param {Object} [scryptParams]
+ * @param {number} [scryptParams.N=131072] - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
+ * @param {number} [scryptParams.r=8] - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used.
+ * @param {number} [scryptParams.p=1] - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.
+ *
+ * @returns {ArrayBuffer} - a derived key of dKLen bytes
  */
-async function scrypt (P, S, N, r, p, dkLen) {
+async function scrypt (P, S, dkLen, scryptParams = {}) {
   if (typeof P === 'string') P = new TextEncoder().encode(P); // encode S as UTF-8
   else if (P instanceof ArrayBuffer) P = new Uint8Array(P);
   else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
@@ -424,11 +414,16 @@ async function scrypt (P, S, N, r, p, dkLen) {
   else if (S instanceof ArrayBuffer) S = new Uint8Array(S);
   else if (!ArrayBuffer.isView(S)) throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView')
 
+  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
+
+  let { N, r, p } = scryptParams;
+  N = (N === undefined) ? 131072 : N;
+  r = (r === undefined) ? 8 : r;
+  p = (p === undefined) ? 1 : p;
+
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
   if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
-
-  if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:
@@ -461,9 +456,37 @@ async function scrypt (P, S, N, r, p, dkLen) {
   return DK
 }
 
+/**
+ * Returns an ArrayBuffer of the desired length in bytes filled with cryptographically secure random bytes
+ * @param {number} [length=16] - The length in bytes of the random salt
+ * @throws {RangeError} length must be integer >= 0
+ * @returns {ArrayBuffer}
+ */
+function salt (length = 16) {
+  if (!Number.isInteger(length) || length < 0) throw new RangeError('length must be integer >= 0')
+
+  if (length === 0) return new ArrayBuffer()
+
+  return crypto.getRandomValues(new Uint8Array(length)).buffer
+}
+
+/**
+ * XORs arr2 to arr1
+ * @private
+ * @param {TypedArray} arr1
+ * @param {TypedArray} arr2
+ *
+ */
+function typedArrayXor (arr1, arr2) {
+  for (let i = 0; i < arr1.length; i++) {
+    arr1[i] ^= arr2[i];
+  }
+}
+
 var index_browser_mod = /*#__PURE__*/Object.freeze({
   __proto__: null,
   salsa208Core: salsa208Core,
+  salt: salt,
   scrypt: scrypt,
   scryptBlockMix: scryptBlockMix,
   scryptROMix: scryptROMix
@@ -673,6 +696,40 @@ describe('testing Salsa 20/8 Core', function () {
   }
 });
 
+// Every test file (you can create as many as you want) should start like this
+// Please, do NOT touch. They will be automatically removed for browser tests -->
+
+
+// <--
+
+describe('testing random salt generation', function () {
+  for (let i = -1; i < 32; i++) {
+    describe(`salt(${i})`, function () {
+      if (i < 0) {
+        it(`should be rejected because of ${i} < 0`, function () {
+          try {
+            index_browser_mod.salt(i);
+            throw new Error('should have failed')
+          } catch (err) {
+            chai.expect(err).to.be.instanceOf(RangeError);
+          }
+        });
+      } else {
+        it(`should return an ArrayBuffer with ${i} random bytes`, function () {
+          const salt = index_browser_mod.salt(i);
+          chai.expect(salt.byteLength).to.equal(i);
+        });
+      }
+    });
+  }
+  describe('salt()', function () {
+    it('should return an ArrayBuffer with 16 random bytes', function () {
+      const salt = index_browser_mod.salt();
+      chai.expect(salt.byteLength).to.equal(16);
+    });
+  });
+});
+
 var scrypt$1 = [
   {
     comment: 'https://tools.ietf.org/html/rfc7914#section-12  #1',
@@ -699,7 +756,7 @@ var scrypt$1 = [
     output: 'fdbabe1c9d3472007856e7190d01e9fe7c6ad7cbc8237830e77376634b3731622eaf30d92e22a3886ff109279d9830dac727afb94a83ee6d8360cbdfa2cc0640'
   },
   {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #3',
+    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #3\nRecommended parameters for interactive login as of 2009 ("check what you can run within 100 ms")',
     input: {
       P: new TextEncoder().encode('pleaseletmein'),
       S: 'SodiumChloride',
@@ -708,10 +765,11 @@ var scrypt$1 = [
       p: 1,
       dkLen: 64
     },
-    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887'
+    output: '7023bdcb3afd7348461c06cd81fd38ebfda8fbba904f8e3ea9b543f6545da1f2d5432955613f0fcf62d49705242a9af9e61e85dc0d651e40dfcf017b45575887',
+    benchmark: true
   },
   {
-    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #4',
+    comment: 'https://tools.ietf.org/html/rfc7914#section-12  #4\nRecommended parameters for file encryption as of 2009 ("check what you can run within 5 s")',
     input: {
       P: 'pleaseletmein',
       S: 'SodiumChloride',
@@ -720,7 +778,32 @@ var scrypt$1 = [
       p: 1,
       dkLen: 64
     },
-    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4'
+    output: '2101cb9b6a511aaeaddbbe09cf70f881ec568d574a2ffd4dabe5ee9820adaa478e56fd8f4ba5d09ffa1c6d927c40f4c337304049e8a952fbcbf45c6fa77a41a4',
+    benchmark: true
+  },
+  {
+    comment: 'Recommended parameters for interactive login as of 2020? ("check what you can run within 100 ms")',
+    input: {
+      P: 'pleaseletmein',
+      S: 'SodiumChloride',
+      N: 32768,
+      r: 8,
+      p: 1,
+      dkLen: 64
+    },
+    output: 'f72cbc204bdcfc3ff5b115d8508aec1566ff0ef3f658388601a3933078ef7ac8198154d9cdb167f8c1cbf22b25eb4934e2c8a98dd8e1a4cbf0c31d2f961a7f22'
+  },
+  {
+    comment: '',
+    input: {
+      P: 'pleaseletmein',
+      S: 'SodiumChloride',
+      N: 131072,
+      r: 8,
+      p: 1,
+      dkLen: 64
+    },
+    output: '2f10fcda14532d6543334cd899776407ff0ae879c370372de5b4e39d4d2d21edcd5d7f191f94407a6f2e8a2430a1258f2e653c55e40531318baafdda82c60cd4'
   },
   {
     comment: '',
@@ -893,7 +976,7 @@ describe('testing scrypt', function () {
       if ('error' in vector) {
         it(`should be rejected because of ${vector.error}`, async function () {
           try {
-            await index_browser_mod.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen);
+            await index_browser_mod.scrypt(vector.input.P, vector.input.S, vector.input.dkLen, { N: vector.input.N, r: vector.input.r, p: vector.input.p });
             throw new Error('should have failed')
           } catch (err) {
             chai.expect(err).to.be.instanceOf(vector.error);
@@ -901,9 +984,15 @@ describe('testing scrypt', function () {
         });
       } else {
         it(`should match ${vector.output}`, async function () {
-          const ret = await index_browser_mod.scrypt(vector.input.P, vector.input.S, vector.input.N, vector.input.r, vector.input.p, vector.input.dkLen);
+          const ret = await index_browser_mod.scrypt(vector.input.P, vector.input.S, vector.input.dkLen, { N: vector.input.N, r: vector.input.r, p: vector.input.p });
           chai.expect(index_browser_mod$1.bufToHex(ret)).to.equal(vector.output);
         });
+        if (vector.input.N === 131072 && vector.input.r === 8 && vector.input.p === 1) {
+          it(`should also match ${vector.output} calling scrypt with default scryptParams`, async function () {
+            const ret = await index_browser_mod.scrypt(vector.input.P, vector.input.S, vector.input.dkLen);
+            chai.expect(index_browser_mod$1.bufToHex(ret)).to.equal(vector.output);
+          });
+        }
       }
     });
   }

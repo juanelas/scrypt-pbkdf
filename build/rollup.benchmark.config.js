@@ -25,6 +25,7 @@ writeFileSync(join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
   <script src="lodash.js"></script>
   <script src="platform.js"></script>
   <script src="benchmark.js"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 
 <body>
@@ -43,7 +44,7 @@ writeFileSync(join(benchmarkBrowserDir, 'index.html'), `<!DOCTYPE html>
 </html>
 `)
 
-const input = join(benchmarkDir, 'scrypt.js')
+const input = join(benchmarkDir, 'scryptParamTunning.js')
 
 export default [
   { // Browser bundles

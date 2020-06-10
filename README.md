@@ -7,33 +7,36 @@
 
 A faster JS implementation of the scrypt password-based key derivation function
 
-## Why another scrypt package
+## Why another scrypt package?
 
-**Efficiency and speed**.
+> **`scrypt-pbkdf2` is 2 to 3 times faster in browsers than other state-of-the-art proposals (namely `scrypt-js` and `scryptsy`), and this means that it is 2 to 3 times more secure**.
 
-The following are benchmarks obtained with the [test vectors defined in the RFC](https://tools.ietf.org/html/rfc7914#section-12) with Chrome 83 Linux 64 bits. The comparisson is similar in Firefox.
+Let me explain such a populist and utterly simplified answer.
+The more secure scrypt is, the more time it needs to complete. Frontend developers know that usability comes first and time is crucial. Therefore, it is likely that they can't allow scrypt to last for more than a few seconds (at most)
 
-```
-Input: {"P":"","S":"","N":16,"r":1,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #1
-  scrypt-pbkdf x 4,692 ops/sec ±5.19% (53 runs sampled)
-  scrypt-js x 8,821 ops/sec ±3.04% (59 runs sampled)
-  scryptsy x 90.03 ops/sec ±2.28% (48 runs sampled)
+Scrypt obviously can be tuned to accomplish such a goal. Quoting the [RFC](https://tools.ietf.org/html/rfc7914#section-2):
 
-Input: {"P":"password","S":"NaCl","N":1024,"r":8,"p":16,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #2
-  scrypt-pbkdf x 3.08 ops/sec ±0.71% (20 runs sampled)
-  scrypt-js x 0.50 ops/sec ±4.78% (7 runs sampled)
-  scryptsy x 1.13 ops/sec ±0.54% (10 runs sampled)
+> Users of scrypt can tune the parameters N, r, and p according to the amount of memory and computing power available, the latency-bandwidth product of the memory subsystem, and the amount of parallelism desired.  At the current time, r=8 and p=1 appears to yield good results, but as memory latency and CPU parallelism increase, it is likely that the optimum values for both r and p will increase.
 
-Input: {"P":"pleaseletmein","S":"SodiumChloride","N":16384,"r":8,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #3
-  scrypt-pbkdf x 2.89 ops/sec ±1.52% (19 runs sampled)
-  scrypt-js x 0.53 ops/sec ±9.85% (7 runs sampled)
-  scryptsy x 1.27 ops/sec ±0.66% (11 runs sampled)
+[Parameter recommendations](https://blog.filippo.io/the-scrypt-parameters/) rely on the idea of using fixed `r=8`and `p=1` and get the biggest `N` (the one and only work factor) that will make scrypt run in less than the desired time. Since memory and CPU usage scale linearly with `N`, so does time and security. Consequently (and oversimplifying), **being 2 to 3 times faster is being 2 to 3 times more secure**
 
-Input: {"P":"pleaseletmein","S":"SodiumChloride","N":1048576,"r":8,"p":1,"dkLen":64} https://tools.ietf.org/html/rfc7914#section-12  #4
-  scrypt-pbkdf x 0.04 ops/sec ±1.25% (5 runs sampled)
-  scrypt-js x 0.01 ops/sec ±3.21% (5 runs sampled)
-  scryptsy x 0.02 ops/sec ±0.74% (5 runs sampled)
-```
+The following table summarizes benchmarks obtained with [Benchmark.js](https://benchmarkjs.com/) with Chrome 83 Linux 64 bits for fixed values `r=8`, `p=1` and varying `N` values. The comparison is similar in Firefox (although twice slower).
+
+| N              | scrypt-pbkdf   | scrypt-js        | scryptsy         |
+| :--------------| :--------------| :----------------| :----------------|
+| 2**12=4096     | 85ms ±10.66%   | 438ms ±4.52%     | 190ms ±5.89%     |
+| 2**13=8192     | 165ms ±4.47%   | 896ms ±2.10%     | 379ms ±1.35%     |
+| 2**14=16384    | 336ms ±2.65%   | 1748ms ±2.29%    | 759ms ±1.47%     |
+| 2**15=32768    | 648ms ±1.93%   | 3565ms ±2.04%    | 1516ms ±1.88%    |
+| 2**16=65536    | 1297ms ±0.29%  | 7041ms ±2.43%    | 2988ms ±0.20%    |
+| 2**17=131072   | 2641ms ±0.36%  | 14318ms ±0.67%   | 6014ms ±1.70%    |
+| 2**18=262144   | 5403ms ±2.31%  | 28477ms ±1.22%   | 11917ms ±0.31%   |
+| 2**19=524288   | 10949ms ±0.32% | 57097ms ±0.79%   | 23974ms ±1.56%   |
+| 2**20=1048576  | 22882ms ±0.45% | 114637ms ±0.98%  | 47470ms ±0.15%   |
+
+You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
+
+Benchmarks for node are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf2`
 
 ## Installation
 
@@ -80,10 +83,29 @@ Import your module as :
    </body>
    ```
 
-An example of usage could be (from an async function):
+If you feel comfortable with *my* choice for scrypt default parameters (`N=131072`, `r=8`, `p=1`), you can easily derive a key (or 'digest') of 256 bits (32 bytes) from a password and a random salt as:
 
 ```javascript
-await scryptPbkdf.scrypt('password', 'salt', 1024, 8, 16, 32)
+const password = 'mySuperSecurePassword'
+const salt = scryptPbkdf.salt()  // returns an ArrayBuffer filled with 16 random bytes
+const derivedKeyLength = 32  // in bytes
+const key = await scryptPbkdf.scrypt(password, salt, derivedKeyLength)  // key is an ArrayBuffer
+```
+
+I have chosen a value of `N=131072` since, based in my own benchmarks, a browser should be able to compute in 5 seconds. However, it is likely that you want to tune the scrypt parameters.
+
+An example of usage (from an async function) using scrypt parameters (`N=16384`, `r=8`, `p=2`) and a random salt of 32 bytes to derive a key of 256 bits (32 bytes) from password 'mySuperSecurePassword':
+
+```javascript
+const password = 'mySuperSecurePassword'
+const salt = scryptPbkdf.salt(32)
+const scryptParams = {
+  N: 16384,
+  r: 8,
+  p: 2
+}
+const derivedKeyLength = 32
+const key = await scryptPbkdf.scrypt(password, salt, derivedKeyLength, scryptParams)
 ```
 
 ## API reference documentation
@@ -96,7 +118,8 @@ Scrypt password-based key derivation function (RFC 7914)
 
 * [scrypt-pbkdf](#module_scrypt-pbkdf)
     * [~salsa208Core(arr)](#module_scrypt-pbkdf..salsa208Core)
-    * [~scrypt(P, S, N, r, p, dkLen)](#module_scrypt-pbkdf..scrypt)
+    * [~salt([length])](#module_scrypt-pbkdf..salt) ⇒ <code>ArrayBuffer</code>
+    * [~scrypt(P, S, dkLen, [scryptParams])](#module_scrypt-pbkdf..scrypt) ⇒ <code>ArrayBuffer</code>
     * [~scryptBlockMix(B)](#module_scrypt-pbkdf..scryptBlockMix)
     * [~scryptROMix(B, N)](#module_scrypt-pbkdf..scryptROMix)
 
@@ -116,21 +139,38 @@ This function modifies the ArrayBuffer of the input UInt32Array
 | --- | --- | --- |
 | arr | <code>Uint32Array</code> | a binary array of 64 octets |
 
+<a name="module_scrypt-pbkdf..salt"></a>
+
+#### scrypt-pbkdf~salt([length]) ⇒ <code>ArrayBuffer</code>
+Returns an ArrayBuffer of the desired length in bytes filled with cryptographically secure random bytes
+
+**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
+**Throws**:
+
+- <code>RangeError</code> length must be integer >= 0
+
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [length] | <code>number</code> | <code>16</code> | The length in bytes of the random salt |
+
 <a name="module_scrypt-pbkdf..scrypt"></a>
 
-#### scrypt-pbkdf~scrypt(P, S, N, r, p, dkLen)
+#### scrypt-pbkdf~scrypt(P, S, dkLen, [scryptParams]) ⇒ <code>ArrayBuffer</code>
 The scrypt Algorithm (RFC 7914)
 
 **Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
+**Returns**: <code>ArrayBuffer</code> - - a derived key of dKLen bytes  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A unicode string with a passphrase. |
-| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)). |
-| N | <code>number</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
-| r | <code>number</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
-| p | <code>number</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
-| dkLen | <code>number</code> | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> |  | A unicode string with a passphrase. |
+| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> |  | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js |
+| dkLen | <code>number</code> |  | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
+| [scryptParams] | <code>Object</code> |  |  |
+| [scryptParams.N] | <code>number</code> | <code>131072</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
+| [scryptParams.r] | <code>number</code> | <code>8</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
+| [scryptParams.p] | <code>number</code> | <code>1</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
 
 <a name="module_scrypt-pbkdf..scryptBlockMix"></a>
 
