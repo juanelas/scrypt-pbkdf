@@ -1,6 +1,6 @@
 {
   "name": "scrypt-pbkdf",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A faster JS implementation of the scrypt password-based key derivation function",
   "keywords": [
     "scrypt",
