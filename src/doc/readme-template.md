@@ -4,7 +4,11 @@
 
 # {{PKG_NAME}}
 
-A faster JS implementation of the scrypt password-based key derivation function
+A faster JS implementation of the scrypt password-based key derivation function defined in [RFC 7914](https://tools.ietf.org/html/rfc7914). It works with Node.js, and native JS, including React and Angular.
+
+The code has been optimized using modern Javascript ArrayBuffers and views, and by using al the all the available native implementations in both Node.js and browsers.
+
+> `scrypt-pbkdf2` runs slower in Firefox than it could run because scrypt internally uses pbkdf2, but the native Firefox implementation has an [issue](https://github.com/mdn/sprints/issues/3278) that prevents using it under some circumstances. Therefore a custom but slower fallback pbkdf2 function has been created
 
 ## Why another scrypt package?
 
@@ -35,7 +39,7 @@ The following table summarizes benchmarks obtained with [Benchmark.js](https://b
 
 You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
 
-Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance is the same as the natives Node's `crypto.scrypt()`, since it is just a thin wrapper of it. The following table summarizes the benchmarks with Node 12 LTS in the same computer.
+Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance is the same as the native Node.js `crypto.scrypt()`, since it is just a thin wrapper of it. The following table summarizes the benchmarks with Node 12 LTS in the same computer.
 
 | N              | scrypt-pbkdf   | scrypt-js         | scryptsy           |
 | :--------------| :--------------| :-----------------| :------------------|
@@ -71,13 +75,13 @@ Import your module as :
    ```
  - JavaScript native or TypeScript project (including React and Angular)
    ```javascript
-   import {{PKG_CAMELCASE}} from '{{PKG_NAME}}'
+   import * as {{PKG_CAMELCASE}} from '{{PKG_NAME}}'
    ... // your code here
    ```
  - JavaScript native browser ES module
    ```html
    <script type="module">
-      import {{PKG_CAMELCASE}} from 'lib/index.browser.bundle.mod.js'  // Use your actual path to the broser mod bundle
+      import * as {{PKG_CAMELCASE}} from 'lib/index.browser.bundle.mod.js'  // Use your actual path to the broser mod bundle
       ... // your code here
    </script>
    ```
