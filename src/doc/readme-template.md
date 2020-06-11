@@ -17,9 +17,9 @@ Scrypt obviously can be tuned to accomplish such a goal. Quoting the [RFC](https
 
 > Users of scrypt can tune the parameters N, r, and p according to the amount of memory and computing power available, the latency-bandwidth product of the memory subsystem, and the amount of parallelism desired.  At the current time, r=8 and p=1 appears to yield good results, but as memory latency and CPU parallelism increase, it is likely that the optimum values for both r and p will increase.
 
-[Parameter recommendations](https://blog.filippo.io/the-scrypt-parameters/) rely on the idea of using fixed `r=8`and `p=1` and get the biggest `N` (the one and only work factor) that will make scrypt run in less than the desired time. Since memory and CPU usage scale linearly with `N`, so does time and security. Consequently (and oversimplifying), **being 2 to 3 times faster is being 2 to 3 times more secure**
+[Parameter recommendations](https://blog.filippo.io/the-scrypt-parameters/) rely on the idea of using fixed `r=8`and `p=1` and get the biggest `N` (the one and only work factor) that will make scrypt run in less than the desired time. Since memory and CPU usage scale linearly with `N`, so does time and security. Consequently (and oversimplifying), **being 2 to 3 times faster is being 2 to 3 times more secure**.
 
-The following table summarizes benchmarks obtained with [Benchmark.js](https://benchmarkjs.com/) with Chrome 83 Linux 64 bits for fixed values `r=8`, `p=1` and varying `N` values. The comparison is similar in Firefox (although twice slower).
+The following table summarizes benchmarks obtained with [Benchmark.js](https://benchmarkjs.com/) for fixed values `r=8`, `p=1` and varying `N` values. The benchmarks were run with Chrome 83 Linux 64 bits in an Intel Core i5-6200U with 8 GB of RAM. The comparison is similar in Firefox (although twice slower).
 
 | N              | scrypt-pbkdf   | scrypt-js        | scryptsy         |
 | :--------------| :--------------| :----------------| :----------------|
@@ -35,7 +35,20 @@ The following table summarizes benchmarks obtained with [Benchmark.js](https://b
 
 You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
 
-Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance shoudl be the same as the Node's `crypto.scrypt()`.
+Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance is the same as the natives Node's `crypto.scrypt()`, since it is just a thin wrapper of it. The following table summarizes the benchmarks with Node 12 LTS in the same computer.
+
+| N              | scrypt-pbkdf   | scrypt-js         | scryptsy           |
+| :--------------| :--------------| :-----------------| :------------------|
+| 2**12=4096     | 12ms ±6.45%    | 49ms ±8.74%       | 106ms ±2.88%       |
+| 2**13=8192     | 23ms ±1.80%    | 96ms ±4.50%       | 212ms ±1.32%       |
+| 2**14=16384    | 47ms ±2.82%    | 192ms ±2.67%      | 423ms ±1.86%       |
+| 2**15=32768    | 94ms ±0.66%    | 387ms ±1.89%      | 849ms ±0.66%       |
+| 2**16=65536    | 210ms ±0.77%   | 792ms ±0.96%      | 1699ms ±0.49%      |
+| 2**17=131072   | 422ms ±1.81%   | 1561ms ±0.49%     | 3429ms ±0.54%      |
+| 2**18=262144   | 847ms ±0.81%   | 3128ms ±0.97%     | 6826ms ±0.55%      |
+| 2**19=524288   | 1704ms ±0.70%  | 6310ms ±0.37%     | 13754ms ±1.80%     |
+| 2**20=1048576  | 3487ms ±3.42%  | 12516ms ±0.28%    | 27446ms ±1.34%     |
+| 2**21=2097152  | 7031ms ±1.06%  | _- (N too large)_ | _- (N too large)_  |
 
 ## Installation
 
@@ -91,9 +104,9 @@ const derivedKeyLength = 32  // in bytes
 const key = await {{PKG_CAMELCASE}}.scrypt(password, salt, derivedKeyLength)  // key is an ArrayBuffer
 ```
 
-I have chosen a value of `N=131072` since, based in my own benchmarks, a browser should be able to compute in 5 seconds. However, it is likely that you want to tune the scrypt parameters.
+I have chosen a value of `N=131072` since, based on my own benchmarks, most browsers will likely compute it in no more than 5 seconds. However, it is likely that you want to tune the scrypt parameters.
 
-An example of usage (from an async function) using scrypt parameters (`N=16384`, `r=8`, `p=2`) and a random salt of 32 bytes to derive a key of 256 bits (32 bytes) from password 'mySuperSecurePassword':
+An example of usage (from an async function) using scrypt parameters (`N=16384`, `r=8`, `p=2`) and a random salt of 32 bytes to derive a key of 256 bits (32 bytes) from password `mySuperSecurePassword`:
 
 ```javascript
 const password = 'mySuperSecurePassword'
