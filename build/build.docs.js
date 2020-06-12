@@ -30,12 +30,13 @@ function getRepositoryData () {
 
 const { repoProvider, repoUsername, repoName } = getRepositoryData() || { repoProvider: null, repoUsername: null, repoName: null }
 
-let iifeBundle, esmBundle, workflowBadget, coverallsBadge
+let iifeBundle, esmBundle, workflowBadget, coverallsBadge, licenseBadge
 if (repoProvider && repoProvider === 'github') {
   iifeBundle = `[IIFE bundle](https://raw.githubusercontent.com/${repoUsername}/${repoName}/master/lib/index.browser.bundle.iife.js)`
   esmBundle = `[ESM bundle](https://raw.githubusercontent.com/${repoUsername}/${repoName}/master/lib/index.browser.bundle.mod.js)`
   workflowBadget = `[![Node CI](https://github.com/${repoUsername}/${repoName}/workflows/Node%20CI/badge.svg)](https://github.com/${repoUsername}/${repoName}/actions?query=workflow%3A%22Node+CI%22)`
   coverallsBadge = `[![Coverage Status](https://coveralls.io/repos/github/${repoUsername}/${repoName}/badge.svg?branch=master)](https://coveralls.io/github/${repoUsername}/${repoName}?branch=master)`
+  licenseBadge = `[![GitHub](https://img.shields.io/github/license/${repoUsername}/${repoName})](https://github.com/${repoUsername}/${repoName}/blob/master/LICENSE)`
 }
 
 const templateFile = path.join(rootDir, pkgJson.directories.src, 'doc', 'readme-template.md')
@@ -46,7 +47,7 @@ let template = fs.readFileSync(templateFile, { encoding: 'UTF-8' })
   .replace(/\{\{ESM_BUNDLE\}\}/g, esmBundle || 'ESM bundle')
 
 if (repoProvider && repoProvider === 'github') {
-  template = template.replace(/\{\{GITHUB_ACTIONS_BADGES\}\}/g, workflowBadget + '\n' + coverallsBadge)
+  template = template.replace(/\{\{GITHUB_ACTIONS_BADGES\}\}/g, workflowBadget + '\n' + coverallsBadge + '\n' + licenseBadge)
 }
 
 const input = path.join(rootDir, pkgJson.browser)

@@ -1,18 +1,19 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 {{GITHUB_ACTIONS_BADGES}}
+[![npm](https://img.shields.io/npm/v/{{PKG_NAME}})](https://www.npmjs.com/package/{{PKG_NAME}})
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 
 # {{PKG_NAME}}
 
-A faster JS implementation of the scrypt password-based key derivation function defined in [RFC 7914](https://tools.ietf.org/html/rfc7914). It works with Node.js, and native JS, including React and Angular.
+A faster JS implementation of the scrypt password-based key derivation function defined in [RFC 7914](https://tools.ietf.org/html/rfc7914). It works with Node.js, and modern browsers' JS, including React and Angular.
 
-The code has been optimized using modern Javascript ArrayBuffers and views, and by using al the all the available native implementations in both Node.js and browsers.
+The code has been optimized using modern Javascript ArrayBuffers and views, and by using all the available native implementations in both Node.js and browsers.
 
-> `scrypt-pbkdf2` runs slower in Firefox than it could run because scrypt internally uses pbkdf2, but the native Firefox implementation has an [issue](https://github.com/mdn/sprints/issues/3278) that prevents using it under some circumstances. Therefore a custom but slower fallback pbkdf2 function has been created
+> `scrypt-pbkdf` runs slower in Firefox than it could run because scrypt internally uses pbkdf2, but the native Firefox implementation has an [issue](https://github.com/mdn/sprints/issues/3278) that prevents using it under some circumstances. Therefore, a custom but slower fallback pbkdf2 function has been created.
 
 ## Why another scrypt package?
 
-> **`scrypt-pbkdf2` is 2 to 3 times faster in browsers than other state-of-the-art proposals (namely `scrypt-js` and `scryptsy`), and this means that it is 2 to 3 times more secure**.
+> **`scrypt-pbkdf` is 2 to 3 times faster in browsers than other state-of-the-art proposals (namely `scrypt-js` and `scryptsy`), and this means that it is 2 to 3 times more secure**.
 
 Let me explain such a populist and utterly simplified answer.
 The more secure scrypt is, the more time it needs to complete. Frontend developers know that usability comes first and time is crucial. Therefore, it is likely that they can't allow scrypt to last for more than a few seconds (at most)
@@ -37,7 +38,7 @@ The following table summarizes benchmarks obtained with [Benchmark.js](https://b
 | 2**19=524288   | 10949ms ±0.32% | 57097ms ±0.79%   | 23974ms ±1.56%   |
 | 2**20=1048576  | 22882ms ±0.45% | 114637ms ±0.98%  | 47470ms ±0.15%   |
 
-You can easily create you own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
+You can easily create your own benchmark by cloning [this repo](https://github.com/juanelas/scrypt-pbkdf), running `npm install`, then `npm run build` and finally open `benchmark/browser/index.html` with your browser.
 
 Benchmarks for Node.js are way better than the ones obtained with browsers, probably because the different packages make use of native implementations. In the case of `scrypt-pbkdf` the performance is the same as the native Node.js `crypto.scrypt()`, since it is just a thin wrapper of it. The following table summarizes the benchmarks with Node 12 LTS in the same computer.
 
@@ -107,6 +108,21 @@ const salt = {{PKG_CAMELCASE}}.salt()  // returns an ArrayBuffer filled with 16 
 const derivedKeyLength = 32  // in bytes
 const key = await {{PKG_CAMELCASE}}.scrypt(password, salt, derivedKeyLength)  // key is an ArrayBuffer
 ```
+
+or using promises as:
+
+```javascript
+const password = 'mySuperSecurePassword'
+const salt = {{PKG_CAMELCASE}}.salt()  // returns an ArrayBuffer filled with 16 random bytes
+const derivedKeyLength = 32  // in bytes
+{{PKG_CAMELCASE}}.scrypt(password, salt, derivedKeyLength).then(
+  function(key) { // key is an ArrayBuffer
+    /* do what you want with the key */
+  }, 
+  function(error) { /* handle an error */ }
+) 
+```
+
 
 I have chosen a value of `N=131072` since, based on my own benchmarks, most browsers will likely compute it in no more than 5 seconds. However, it is likely that you want to tune the scrypt parameters.
 
