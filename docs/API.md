@@ -10,6 +10,10 @@ Scrypt password-based key derivation function (RFC 7914)
 
 - [ScryptParams](interfaces/scryptparams.md)
 
+### Type aliases
+
+- [TypedArray](API.md#typedarray)
+
 ### Functions
 
 - [salsa208Core](API.md#salsa208core)
@@ -17,6 +21,14 @@ Scrypt password-based key derivation function (RFC 7914)
 - [scrypt](API.md#scrypt)
 - [scryptBlockMix](API.md#scryptblockmix)
 - [scryptROMix](API.md#scryptromix)
+
+## Type aliases
+
+### TypedArray
+
+Ƭ **TypedArray**: Int8Array \| Uint8Array \| Uint8ClampedArray \| Int16Array \| Uint16Array \| Int32Array \| Uint32Array \| Float32Array \| Float64Array \| BigInt64Array \| BigUint64Array
+
+Defined in: shared-types.ts:1
 
 ## Functions
 
@@ -39,7 +51,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/salsa208Core.ts#L12)
+Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/salsa208Core.ts#L12)
 
 ___
 
@@ -59,13 +71,13 @@ Name | Type | Default value |
 
 **Returns:** ArrayBuffer
 
-Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/salt.ts#L7)
+Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/salt.ts#L7)
 
 ___
 
 ### scrypt
 
-▸ `Const`**scrypt**(`P`: *string* \| ArrayBuffer \| TypedArray \| DataView, `S`: *string* \| ArrayBuffer \| TypedArray \| DataView, `dkLen`: *number*, `scryptParams?`: [*ScryptParams*](interfaces/scryptparams.md)): *Promise*<ArrayBuffer\>
+▸ `Const`**scrypt**(`P`: *string* \| ArrayBuffer \| [*TypedArray*](API.md#typedarray) \| DataView, `S`: *string* \| ArrayBuffer \| [*TypedArray*](API.md#typedarray) \| DataView, `dkLen`: *number*, `scryptParams?`: [*ScryptParams*](interfaces/scryptparams.md)): *Promise*<ArrayBuffer\>
 
 The scrypt Algorithm (RFC 7914)
 
@@ -73,8 +85,8 @@ The scrypt Algorithm (RFC 7914)
 
 Name | Type | Description |
 :------ | :------ | :------ |
-`P` | *string* \| ArrayBuffer \| TypedArray \| DataView | A unicode string with a passphrase.   |
-`S` | *string* \| ArrayBuffer \| TypedArray \| DataView | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js   |
+`P` | *string* \| ArrayBuffer \| [*TypedArray*](API.md#typedarray) \| DataView | A unicode string with a passphrase.   |
+`S` | *string* \| ArrayBuffer \| [*TypedArray*](API.md#typedarray) \| DataView | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js   |
 `dkLen` | *number* | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.   |
 `scryptParams?` | [*ScryptParams*](interfaces/scryptparams.md) | scrypt configuration parameters: N, p, r    |
 
@@ -82,7 +94,7 @@ Name | Type | Description |
 
 - a derived key of dKLen bytes
 
-Defined in: [scrypt.ts:26](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scrypt.ts#L26)
+Defined in: [scrypt.ts:27](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scrypt.ts#L27)
 
 ___
 
@@ -104,7 +116,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scryptBlockMix.ts#L17)
+Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scryptBlockMix.ts#L17)
 
 ___
 
@@ -125,4 +137,4 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scryptRomMix.ts#L14)
+Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scryptRomMix.ts#L14)

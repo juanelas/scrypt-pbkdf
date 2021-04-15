@@ -1,4 +1,4 @@
-import { TypedArray } from 'pbkdf2-hmac';
+import { TypedArray } from './shared-types';
 /**
  * XORs arr2 to arr1. Both must be the same type of TypedArray
  * @private

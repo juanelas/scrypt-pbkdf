@@ -1,5 +1,6 @@
 import { scryptROMix } from './scryptRomMix'
 import pbkdf2Hmac from 'pbkdf2-hmac'
+import { TypedArray } from './shared-types'
 
 /**
  * scrypt configuration parameters

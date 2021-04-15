@@ -1,3 +1,4 @@
+import { TypedArray } from './shared-types';
 /**
  * scrypt configuration parameters
  */
