@@ -39,7 +39,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/37a1edb/src/ts/salsa208Core.ts#L12)
+Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/salsa208Core.ts#L12)
 
 ___
 
@@ -59,7 +59,7 @@ Name | Type | Default value |
 
 **Returns:** ArrayBuffer
 
-Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/37a1edb/src/ts/salt.ts#L7)
+Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/salt.ts#L7)
 
 ___
 
@@ -82,7 +82,7 @@ Name | Type | Description |
 
 - a derived key of dKLen bytes
 
-Defined in: [scrypt.ts:26](https://github.com/juanelas/scrypt-bigint/blob/37a1edb/src/ts/scrypt.ts#L26)
+Defined in: [scrypt.ts:26](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scrypt.ts#L26)
 
 ___
 
@@ -104,7 +104,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/37a1edb/src/ts/scryptBlockMix.ts#L17)
+Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scryptBlockMix.ts#L17)
 
 ___
 
@@ -125,4 +125,4 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/37a1edb/src/ts/scryptRomMix.ts#L14)
+Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/df7163d/src/ts/scryptRomMix.ts#L14)
