@@ -28,7 +28,7 @@ Scrypt password-based key derivation function (RFC 7914)
 
 Ƭ **TypedArray**: Int8Array \| Uint8Array \| Uint8ClampedArray \| Int16Array \| Uint16Array \| Int32Array \| Uint32Array \| Float32Array \| Float64Array \| BigInt64Array \| BigUint64Array
 
-Defined in: shared-types.ts:1
+Defined in: [shared-types.ts:1](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/shared-types.ts#L1)
 
 ## Functions
 
@@ -51,7 +51,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/salsa208Core.ts#L12)
+Defined in: [salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/salsa208Core.ts#L12)
 
 ___
 
@@ -71,7 +71,7 @@ Name | Type | Default value |
 
 **Returns:** ArrayBuffer
 
-Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/salt.ts#L7)
+Defined in: [salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/salt.ts#L7)
 
 ___
 
@@ -94,7 +94,7 @@ Name | Type | Description |
 
 - a derived key of dKLen bytes
 
-Defined in: [scrypt.ts:27](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scrypt.ts#L27)
+Defined in: [scrypt.ts:27](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/scrypt.ts#L27)
 
 ___
 
@@ -116,7 +116,7 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scryptBlockMix.ts#L17)
+Defined in: [scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/scryptBlockMix.ts#L17)
 
 ___
 
@@ -137,4 +137,4 @@ Name | Type | Description |
 
 **Returns:** *void*
 
-Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/4f4e186/src/ts/scryptRomMix.ts#L14)
+Defined in: [scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/9301916/src/ts/scryptRomMix.ts#L14)
