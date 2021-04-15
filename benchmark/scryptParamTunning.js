@@ -1,4 +1,4 @@
-const scryptPbkdf = require('../lib/index.node')
+const scryptPbkdf = require('..')
 const scryptsy = require('scryptsy')
 const scryptjs = require('scrypt-js')
 

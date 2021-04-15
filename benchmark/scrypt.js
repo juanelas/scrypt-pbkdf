@@ -1,4 +1,4 @@
-const scryptPbkdf = require('../lib/index.node')
+const scryptPbkdf = require('..')
 const scryptsy = require('scryptsy')
 const scryptjs = require('scrypt-js')
 
@@ -6,7 +6,7 @@ const bigintConversion = require('bigint-conversion')
 
 const Benchmark = require('benchmark')
 
-const tests = require('../test/vectors/scrypt').filter(val => (val.benchmark))
+const tests = require('../test-vectors/scrypt').filter(val => (val.benchmark))
 
 const suite = new Benchmark.Suite('scrypt')
 for (const test of tests) {

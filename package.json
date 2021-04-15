@@ -14,69 +14,94 @@
     "email": "j.hernandez@upc.edu"
   },
   "repository": "github:juanelas/scrypt-pbkdf",
-  "main": "./lib/index.node.js",
-  "browser": "./lib/index.browser.mod.js",
-  "types": "./types/index.d.ts",
+  "types": "./dist/esm/types/index.d.ts",
+  "main": "./dist/cjs/index.node.cjs",
+  "browser": "./dist/esm/index.browser.js",
+  "module": "./dist/esm/index.node.js",
+  "exports": {
+    ".": {
+      "node": {
+        "require": "./dist/cjs/index.node.cjs",
+        "import": "./dist/esm/index.node.js"
+      },
+      "default": "./dist/esm/index.browser.js"
+    },
+    "./bundles/": "./dist/bundles/",
+    "./types/": "./dist/esm/types/"
+  },
   "directories": {
+    "benchmark": "./benchmark",
     "build": "./build",
-    "lib": "./lib",
+    "dist": "./dist",
+    "docs": "./docs",
     "src": "./src",
-    "test": "./test",
-    "types": "./types",
-    "benchmark": "./benchmark"
+    "test": "./test"
   },
   "scripts": {
-    "test": "nyc --check-coverage mocha",
-    "coverage": "nyc report --reporter=lcov",
     "benchmark": "node benchmark/scrypt.js",
-    "build:js": "rollup -c build/rollup.config.js",
+    "build": "run-s lint build:js docs test:browser coverage",
     "build:benchmark": "rollup -c build/rollup.benchmark.config.js",
-    "build:standard": "standard --fix",
-    "build:browserTests": "rollup -c build/rollup.tests.config.js",
-    "build:docs": "node build/build.docs.js",
-    "build:dts": "node build/build.dts.js",
-    "build": "run-s build:**",
-    "preversion": "npm run build && npm run test",
-    "postversion": "git push"
+    "build:js": "rollup -c build/rollup.config.js",
+    "clean": "rimraf .nyc_output .mocha-ts coverage dist docs",
+    "coverage": "nyc --check-coverage --exclude build --exclude '{src/ts/**/*.spec.ts,test/**/*.ts,test-vectors/**/*}' --reporter=text --reporter=lcov node ./build/bin/mocha-ts.js --require build/testing/mocha/mocha-init.js '{src/ts/**/*.spec.ts,test/**/*.ts}'",
+    "docs": "node build/build.docs.js",
+    "lint": "ts-standard --fix",
+    "mocha": "node ./build/bin/mocha-ts.js --require build/testing/mocha/mocha-init.js ",
+    "preversion": "run-s lint build:js test:browser coverage",
+    "postversion": "npm run docs",
+    "test": "run-s test:browser test:node",
+    "test:browser": "node build/testing/browser/index.js",
+    "test:node": "npm run mocha -- '{src/ts/**/*.spec.ts,test/**/*.ts}'",
+    "watch": "npm run mocha -- --watch '{src/ts/**/*.spec.ts,test/**/*.ts,test-vectors/**/*}'"
   },
-  "standard": {
+  "ts-standard": {
     "env": [
       "mocha"
     ],
     "globals": [
-      "crypto",
-      "BigUint64Array",
-      "BigInt"
+      "IS_BROWSER",
+      "browser",
+      "page",
+      "_pkg",
+      "chai"
     ],
+    "project": "./tsconfig.json",
     "ignore": [
-      "/test/browser/",
-      "/lib/index.browser.bundle.iife*.js",
-      "/lib/index.browser.bundle.mod*.js",
+      "dist/**/*",
       "/benchmark/browser/",
       "/benchmark/browserified/",
       "/benchmark/node/"
     ]
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^12.0.0",
-    "@rollup/plugin-multi-entry": "^3.0.1",
-    "@rollup/plugin-node-resolve": "^8.0.1",
-    "@rollup/plugin-replace": "^2.3.3",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-multi-entry": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-replace": "^2.4.1",
+    "@rollup/plugin-typescript": "^8.2.0",
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.1",
     "benchmark": "^2.1.4",
-    "bigint-conversion": "^2.1.11",
-    "browserify": "^16.5.1",
-    "chai": "^4.2.0",
-    "jsdoc-to-markdown": "^6.0.1",
-    "mocha": "^7.2.0",
+    "bigint-conversion": "^2.1.12",
+    "chai": "^4.3.3",
+    "glob": "^7.1.6",
+    "json5": "^2.2.0",
+    "minimatch": "^3.0.4",
+    "mocha": "^8.3.0",
     "npm-run-all": "^4.1.5",
     "nyc": "^15.1.0",
-    "rollup": "^2.15.0",
-    "rollup-plugin-ignore": "^1.0.6",
-    "rollup-plugin-terser": "^6.1.0",
+    "pirates": "^4.0.1",
+    "puppeteer": "^8.0.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.40.0",
+    "rollup-plugin-terser": "^7.0.2",
     "scrypt-js": "^3.0.1",
     "scryptsy": "^2.1.0",
-    "standard": "^14.3.4",
-    "typescript": "^3.9.5"
+    "ts-standard": "^10.0.0",
+    "tslib": "^2.1.0",
+    "typedoc": "^0.20.29",
+    "typedoc-plugin-markdown": "^3.6.0",
+    "typescript": "^4.2.2"
   },
   "dependencies": {
     "pbkdf2-hmac": "^1.0.2"

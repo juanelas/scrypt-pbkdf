@@ -9,6 +9,7 @@ src/*
 
 # Test files
 test/*
+test-vectors/*
 
 # benchmark files
 benchmark/*

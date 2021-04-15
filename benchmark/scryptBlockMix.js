@@ -1,9 +1,9 @@
-const scrypt = require('../lib/index.node')
+const scrypt = require('..')
 
 const Benchmark = require('benchmark')
 const bigintConversion = require('bigint-conversion')
 
-const tests = require('../test/vectors/scryptBlockMix')
+const tests = require('../test-vectors/scryptBlockMix')
 
 const suite = new Benchmark.Suite('scryptBlockMix')
 for (const test of tests) {

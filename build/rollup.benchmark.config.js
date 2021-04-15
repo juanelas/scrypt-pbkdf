@@ -52,21 +52,22 @@ export default [
     output: [
       {
         file: join(benchmarkBrowserDir, 'tests.js'),
-        format: 'es'
+        format: 'iife'
       }
     ],
     plugins: [
       replace({
-        '../lib/index.node': '../lib/index.browser.mod',
         'const Benchmark = require(\'benchmark\')': '',
         'require(\'scryptsy\')': 'require(\'./browserified/scryptsy.js\')',
         'process.browser = true;': '',
         delimiters: ['', ''],
-        'process.browser': true
+        IS_BROWSER: true,
+        preventAssignment: true
       }),
       commonjs(),
       resolve({
-        browser: true
+        browser: true,
+        exportConditions: ['browser', 'module', 'import', 'default']
       })
     ],
     external: []

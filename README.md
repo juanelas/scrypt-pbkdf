@@ -1,9 +1,7 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![Node CI](https://github.com/juanelas/scrypt-pbkdf/workflows/Node%20CI/badge.svg)](https://github.com/juanelas/scrypt-pbkdf/actions?query=workflow%3A%22Node+CI%22)
 [![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-pbkdf/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-pbkdf?branch=master)
-[![GitHub](https://img.shields.io/github/license/juanelas/scrypt-pbkdf)](https://github.com/juanelas/scrypt-pbkdf/blob/master/LICENSE)
-[![npm](https://img.shields.io/npm/v/scrypt-pbkdf)](https://www.npmjs.com/package/scrypt-pbkdf)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-
 
 # scrypt-pbkdf
 
@@ -57,50 +55,29 @@ Benchmarks for Node.js are way better than the ones obtained with browsers, prob
 | 2**20=1048576  | 3487ms ±3.42%  | 12516ms ±0.28%    | 27446ms ±1.34%     |
 | 2**21=2097152  | 7031ms ±1.06%  | _- (N too large)_ | _- (N too large)_  |
 
-## Installation
+## Usage
 
 `scrypt-pbkdf` can be imported to your project with `npm`:
 
-```bash
+```console
 npm install scrypt-pbkdf
 ```
 
-NPM installation defaults to the ES6 module for browsers and the CJS one for Node.js. For web browsers, you can also directly download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/lib/index.browser.bundle.iife.js) or the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/lib/index.browser.bundle.mod.js) from the repository.
+Then either require (Node.js CJS):
 
-## Usage examples
+```javascript
+const scryptPbkdf = require('scrypt-pbkdf')
+```
 
-Import your module as :
+or import (JavaScript ES module):
 
- - Node.js
-   ```javascript
-   const scryptPbkdf = require('scrypt-pbkdf')
-   ... // your code here
-   ```
- - JavaScript native or TypeScript project (including React and Angular)
-   ```javascript
-   import * as scryptPbkdf from 'scrypt-pbkdf'
-   ... // your code here
-   ```
- - JavaScript native browser ES module
-   ```html
-   <script type="module">
-      import * as scryptPbkdf from 'lib/index.browser.bundle.mod.js'  // Use your actual path to the broser mod bundle
-      ... // your code here
-   </script>
-   ```
- - JavaScript native browser IIFE
-   ```html
-   <head>
-     ...
-     <script src="../../lib/index.browser.bundle.iife.js"></script> <!-- Use your actual path to the browser bundle -->
-   </head>
-   <body>
-     ...
-     <script>
-       ... // your code here
-     </script>
-   </body>
-   ```
+```javascript
+import * as scryptPbkdf from 'scrypt-pbkdf'
+```
+
+The appropriate version for browser or node is automatically exported.
+
+You can also download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.iife.js), the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.esm.js) or the [UMD bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.umd.js) and manually add it to your project, or, if you have already imported `scrypt-pbkdf` to your project, just get the bundles from `node_modules/scrypt-pbkdf/dist/bundles/`.
 
 If you feel comfortable with *my* choice for scrypt default parameters (`N=131072`, `r=8`, `p=1`), you can easily derive a key (or 'digest') of 256 bits (32 bytes) from a password and a random salt as:
 
@@ -125,7 +102,6 @@ scryptPbkdf.scrypt(password, salt, derivedKeyLength).then(
 ) 
 ```
 
-
 I have chosen a value of `N=131072` since, based on my own benchmarks, most browsers will likely compute it in no more than 5 seconds. However, it is likely that you want to tune the scrypt parameters.
 
 An example of usage (from an async function) using scrypt parameters (`N=16384`, `r=8`, `p=2`) and a random salt of 32 bytes to derive a key of 256 bits (32 bytes) from password `mySuperSecurePassword`:
@@ -144,94 +120,4 @@ const key = await scryptPbkdf.scrypt(password, salt, derivedKeyLength, scryptPar
 
 ## API reference documentation
 
-<a name="module_scrypt-pbkdf"></a>
-
-### scrypt-pbkdf
-Scrypt password-based key derivation function (RFC 7914)
-
-
-* [scrypt-pbkdf](#module_scrypt-pbkdf)
-    * [~salsa208Core(arr)](#module_scrypt-pbkdf..salsa208Core)
-    * [~salt([length])](#module_scrypt-pbkdf..salt) ⇒ <code>ArrayBuffer</code>
-    * [~scrypt(P, S, dkLen, [scryptParams])](#module_scrypt-pbkdf..scrypt) ⇒ <code>ArrayBuffer</code>
-    * [~scryptBlockMix(B)](#module_scrypt-pbkdf..scryptBlockMix)
-    * [~scryptROMix(B, N)](#module_scrypt-pbkdf..scryptROMix)
-
-<a name="module_scrypt-pbkdf..salsa208Core"></a>
-
-#### scrypt-pbkdf~salsa208Core(arr)
-Salsa20/8 Core is a round-reduced variant of the Salsa20 Core.  It is a
-hash function from 64-octet strings to 64-octet strings.  Note that
-Salsa20/8 Core is not a cryptographic hash function since it is not
-collision resistant.
-
-This function modifies the ArrayBuffer of the input UInt32Array
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| arr | <code>Uint32Array</code> | a binary array of 64 octets |
-
-<a name="module_scrypt-pbkdf..salt"></a>
-
-#### scrypt-pbkdf~salt([length]) ⇒ <code>ArrayBuffer</code>
-Returns an ArrayBuffer of the desired length in bytes filled with cryptographically secure random bytes
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-**Throws**:
-
-- <code>RangeError</code> length must be integer >= 0
-
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [length] | <code>number</code> | <code>16</code> | The length in bytes of the random salt |
-
-<a name="module_scrypt-pbkdf..scrypt"></a>
-
-#### scrypt-pbkdf~scrypt(P, S, dkLen, [scryptParams]) ⇒ <code>ArrayBuffer</code>
-The scrypt Algorithm (RFC 7914)
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-**Returns**: <code>ArrayBuffer</code> - - a derived key of dKLen bytes  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| P | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> |  | A unicode string with a passphrase. |
-| S | <code>string</code> \| <code>ArrayBuffer</code> \| <code>TypedArray</code> \| <code>DataView</code> |  | A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js |
-| dkLen | <code>number</code> |  | Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32. |
-| [scryptParams] | <code>Object</code> |  |  |
-| [scryptParams.N] | <code>number</code> | <code>131072</code> | CPU/memory cost parameter - Must be a power of 2 (e.g. 1024) |
-| [scryptParams.r] | <code>number</code> | <code>8</code> | The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. |
-| [scryptParams.p] | <code>number</code> | <code>1</code> | Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. |
-
-<a name="module_scrypt-pbkdf..scryptBlockMix"></a>
-
-#### scrypt-pbkdf~scryptBlockMix(B)
-The scryptBlockMix algorithm is the same as the BlockMix algorithm
-described in the original scrypt paper but with Salsa20/8 Core used as
-the hash function.
-
-This function modifies the ArrayBuffer of the input BigUint64Array
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| B | <code>Uint32Array</code> | B[0] || B[1] || ... || B[2 * r - 1]                          Input octet string (of size 128 * r octets),                          treated as 2 * r 64-octet blocks,                          where each element in B is a 64-octet block. |
-
-<a name="module_scrypt-pbkdf..scryptROMix"></a>
-
-#### scrypt-pbkdf~scryptROMix(B, N)
-The scryptROMix algorithm
-
-This function modifies the ArrayBuffer of the input BigInt64Array
-
-**Kind**: inner method of [<code>scrypt-pbkdf</code>](#module_scrypt-pbkdf)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| B | <code>Uint32Array</code> | Input octet vector of length 128 * r octets. |
-| N | <code>number</code> | CPU/Memory cost parameter, must be larger than 1,                             a power of 2, and less than 2^(128 * r / 8). |
-
+[Check the API](./docs/API.md)
