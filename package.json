@@ -39,7 +39,7 @@
   },
   "scripts": {
     "benchmark": "node benchmark/scrypt.js",
-    "build": "run-s lint build:js docs test:browser coverage",
+    "build": "run-s lint build:js build:benchmark docs test:browser coverage",
     "build:benchmark": "rollup -c build/rollup.benchmark.config.js",
     "build:js": "rollup -c build/rollup.config.js",
     "clean": "rimraf .nyc_output .mocha-ts coverage dist docs",
