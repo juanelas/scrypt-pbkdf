@@ -2,17 +2,17 @@
 *.test.js
 
 # Build scripts
-build/*
+build
 
-# Source files
-src/*
+# Source docs files
+src/docs
 
 # Test files
 test/*
 test-vectors/*
 
 # benchmark files
-benchmark/*
+benchmark
 
 # Logs
 logs
@@ -30,7 +30,7 @@ npm-debug.log*
 
 # MYC output
 .nyc_output
-coverage/*
+coverage
 
 # Travis
 .travis.yml
