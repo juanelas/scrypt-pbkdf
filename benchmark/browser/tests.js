@@ -396,10 +396,7 @@
    * @param P - A unicode string with a passphrase.
    * @param S - A salt. This should be a random or pseudo-random value of at least 16 bytes. You can easily get one with crypto.getRandomValues(new Uint8Array(16)) in browser's JS or with crypto.randomBytes(16).buffer in Node.js
    * @param dkLen - Intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32.
-   * @param scryptParams
-   * @param scryptParams.N - CPU/memory cost parameter - Must be a power of 2 (e.g. 1024). Defaults to 131072
-   * @param scryptParams.r - The blocksize parameter, which fine-tunes sequential memory read size and performance. 8 is commonly used. Defaults to 8
-   * @param scryptParams.p - Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r. Defaults to 1
+   * @param scryptParams - scrypt configuration parameters: N, p, r
    *
    * @returns {ArrayBuffer} - a derived key of dKLen bytes
    */
@@ -418,9 +415,9 @@
           throw RangeError('S should be string, ArrayBuffer, TypedArray, DataView');
       if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440)
           throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32');
-      const N = (scryptParams?.N !== undefined) ? scryptParams.N : 131072;
-      const r = (scryptParams?.r !== undefined) ? scryptParams.r : 8;
-      const p = (scryptParams?.p !== undefined) ? scryptParams.p : 1;
+      const N = ((scryptParams === null || scryptParams === void 0 ? void 0 : scryptParams.N) !== undefined) ? scryptParams.N : 131072;
+      const r = ((scryptParams === null || scryptParams === void 0 ? void 0 : scryptParams.r) !== undefined) ? scryptParams.r : 8;
+      const p = ((scryptParams === null || scryptParams === void 0 ? void 0 : scryptParams.p) !== undefined) ? scryptParams.p : 1;
       if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0)
           throw RangeError('N must be a power of 2');
       if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75)

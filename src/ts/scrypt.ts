@@ -34,9 +34,9 @@ const scrypt = async function (P: string | ArrayBuffer | TypedArray | DataView, 
 
   if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen > 137438953440) throw RangeError('dkLen is the intended output length in octets of the derived key; a positive integer less than or equal to (2^32 - 1) * hLen where hLen is 32')
 
-  const N = (scryptParams?.N !== undefined) ? scryptParams.N : 131072
-  const r = (scryptParams?.r !== undefined) ? scryptParams.r : 8
-  const p = (scryptParams?.p !== undefined) ? scryptParams.p : 1
+  const N = (scryptParams !== undefined && scryptParams.N !== undefined) ? scryptParams.N : 131072 // eslint-disable-line
+  const r = (scryptParams !== undefined && scryptParams.r !== undefined) ? scryptParams.r : 8 // eslint-disable-line
+  const p = (scryptParams !== undefined && scryptParams.p !== undefined) ? scryptParams.p : 1 // eslint-disable-line
 
   if (!Number.isInteger(N) || N <= 0 || (N & (N - 1)) !== 0) throw RangeError('N must be a power of 2')
 
