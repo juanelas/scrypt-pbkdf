@@ -130,7 +130,7 @@ export default [
         preventAssignment: true
       }),
       inject({
-        crypto: 'crypto'
+        crypto: ['crypto', 'webcrypto']
       }),
       typescriptPlugin(tsBundleOptions),
       // resolve({
@@ -161,7 +161,7 @@ export default [
         preventAssignment: true
       }),
       inject({
-        crypto: 'crypto'
+        crypto: ['crypto', 'webcrypto']
       }),
       typescriptPlugin(tsBundleOptions),
       // resolve({
