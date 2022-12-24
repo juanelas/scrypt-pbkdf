@@ -20,7 +20,7 @@ CPU/memory cost parameter - Must be a power of 2 (e.g. 1024)
 
 #### Defined in
 
-[scrypt.ts:10](https://github.com/juanelas/scrypt-bigint/blob/f2b2a96/src/ts/scrypt.ts#L10)
+[scrypt.ts:10](https://github.com/juanelas/scrypt-bigint/blob/7959ef9/src/ts/scrypt.ts#L10)
 
 ___
 
@@ -32,7 +32,7 @@ Parallelization parameter; a positive integer satisfying p ≤ (2^32− 1) * hLe
 
 #### Defined in
 
-[scrypt.ts:14](https://github.com/juanelas/scrypt-bigint/blob/f2b2a96/src/ts/scrypt.ts#L14)
+[scrypt.ts:14](https://github.com/juanelas/scrypt-bigint/blob/7959ef9/src/ts/scrypt.ts#L14)
 
 ___
 
@@ -44,4 +44,4 @@ The blocksize parameter, which fine-tunes sequential memory read size and perfor
 
 #### Defined in
 
-[scrypt.ts:12](https://github.com/juanelas/scrypt-bigint/blob/f2b2a96/src/ts/scrypt.ts#L12)
+[scrypt.ts:12](https://github.com/juanelas/scrypt-bigint/blob/7959ef9/src/ts/scrypt.ts#L12)
