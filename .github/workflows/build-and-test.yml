@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
   nodetests:
-    name: run tests and coverage for Node.js
+    name: tests in Node.js
     needs: [build]
     runs-on: ${{ matrix.os }}
     strategy:
