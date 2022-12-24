@@ -1,3 +1,5 @@
+import * as _pkg from '#pkg'
+
 describe('testing random salt generation', function () {
   for (let i = -1; i < 32; i++) {
     describe(`salt(${i})`, function () {

@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     comment: 'https://tools.ietf.org/html/rfc7914#section-8',
     input: {

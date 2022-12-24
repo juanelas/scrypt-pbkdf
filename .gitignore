@@ -1,23 +1,23 @@
-# test builds
-*.test.js
-
 # Logs
 logs
 *.log
 npm-debug.log*
 
 # Dependency directories
-node_modules/
+node_modules
 
 # Output of 'npm pack'
 *.tgz
 
-# Visual Studio Code
-.vscode
+# Coverage
+coverage
 
-# IntelliJ
-.idea
+# Environment files
+*.env
 
-# MYC output
-.nyc_output
-coverage/*
+# Test temporal files
+.mocha-ts
+.tsconfig.json
+
+# docs temporal files
+.nojekyll

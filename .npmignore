@@ -1,18 +1,11 @@
-# test builds
-*.test.js
-
 # Build scripts
 build
 
-# Source docs files
-src/docs
-
 # Test files
-test/*
-test-vectors/*
-
-# benchmark files
-benchmark
+test
+__tests__
+**/*.spec.ts
+test-vectors
 
 # Logs
 logs
@@ -28,12 +21,38 @@ npm-debug.log*
 # IntelliJ
 .idea
 
-# MYC output
-.nyc_output
+# Coverage
 coverage
-
-# Travis
-.travis.yml
 
 # GitHub
 .github
+
+# GitLab
+.gitlab-ci.yml
+.gitlab-ci.yaml
+
+# tsconfig
+tsconfig.json
+
+# SRC docs
+src/docs
+
+# Environment files
+*.env
+*.env.*
+
+# Test temporal files
+.mocha-ts
+.tsconfig.json
+
+# docs temporal files
+.nojekyll
+
+# code of conduct
+CODE_OF_CONDUCT.md
+
+# TODO
+TO-DO.txt
+
+# benchmark
+benchmark

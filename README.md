@@ -1,7 +1,8 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Node CI](https://github.com/juanelas/scrypt-pbkdf/workflows/Node%20CI/badge.svg)](https://github.com/juanelas/scrypt-pbkdf/actions?query=workflow%3A%22Node+CI%22)
-[![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-pbkdf/badge.svg?branch=master)](https://coveralls.io/github/juanelas/scrypt-pbkdf?branch=master)
+[![Node.js CI](https://github.com/juanelas/scrypt-pbkdf/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/juanelas/scrypt-pbkdf/actions/workflows/build-and-test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/juanelas/scrypt-pbkdf/badge.svg?branch=main)](https://coveralls.io/github/juanelas/scrypt-pbkdf?branch=main)
 
 # scrypt-pbkdf
 
@@ -75,9 +76,19 @@ or import (JavaScript ES module):
 import * as scryptPbkdf from 'scrypt-pbkdf'
 ```
 
-The appropriate version for browser or node is automatically exported.
+> The appropriate version for browser or node should be automatically chosen when importing. However, if your bundler does not import the appropriate module version (node esm, node cjs or browser esm), you can force it to use a specific one by just importing one of the followings:
+>
+> - `scrypt-pbkdf/dist/cjs/index.node`: for Node.js CJS module
+> - `scrypt-pbkdf/dist/esm/index.node`: for Node.js ESM module
+> - `scrypt-pbkdf/dist/esm/index.browser`: for browser ESM module
+>
+> If you are coding TypeScript, types will not be automatically detected when using the specific versions. You can easily get the types in by creating adding to a types declaration file (`.d.ts`) the following line:
+>
+> ```typescript
+> declare module 'scrypt-pbkdf/dist/esm/index.browser' // use the specific file you were importing
+> ```
 
-You can also download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.iife.js), the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.esm.js) or the [UMD bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/master/dist/bundles/scrypt-pbkdf.umd.js) and manually add it to your project, or, if you have already imported `scrypt-pbkdf` to your project, just get the bundles from `node_modules/scrypt-pbkdf/dist/bundles/`.
+You can also download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/iife.js), the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/esm.min.js) or the [UMD bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/umd.js) and manually add it to your project, or, if you have already installed `scrypt-pbkdf` in your project, just get the bundles from `node_modules/scrypt-pbkdf/dist/bundles/`.
 
 If you feel comfortable with *my* choice for scrypt default parameters (`N=131072`, `r=8`, `p=1`), you can easily derive a key (or 'digest') of 256 bits (32 bytes) from a password and a random salt as:
 

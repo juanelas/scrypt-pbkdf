@@ -1,4 +1,5 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: {{PKG_LICENSE}}](https://img.shields.io/badge/License-{{PKG_LICENSE}}-yellow.svg)](LICENSE)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 {{GITHUB_ACTIONS_BADGES}}
 
@@ -74,9 +75,19 @@ or import (JavaScript ES module):
 import * as {{PKG_CAMELCASE}} from '{{PKG_NAME}}'
 ```
 
-The appropriate version for browser or node is automatically exported.
+> The appropriate version for browser or node should be automatically chosen when importing. However, if your bundler does not import the appropriate module version (node esm, node cjs or browser esm), you can force it to use a specific one by just importing one of the followings:
+>
+> - `{{PKG_NAME}}/dist/cjs/index.node`: for Node.js CJS module
+> - `{{PKG_NAME}}/dist/esm/index.node`: for Node.js ESM module
+> - `{{PKG_NAME}}/dist/esm/index.browser`: for browser ESM module
+>
+> If you are coding TypeScript, types will not be automatically detected when using the specific versions. You can easily get the types in by creating adding to a types declaration file (`.d.ts`) the following line:
+>
+> ```typescript
+> declare module '{{PKG_NAME}}/dist/esm/index.browser' // use the specific file you were importing
+> ```
 
-You can also download the {{IIFE_BUNDLE}}, the {{ESM_BUNDLE}} or the {{UMD_BUNDLE}} and manually add it to your project, or, if you have already imported `{{PKG_NAME}}` to your project, just get the bundles from `node_modules/{{PKG_NAME}}/dist/bundles/`.
+You can also download the {{IIFE_BUNDLE}}, the {{ESM_BUNDLE}} or the {{UMD_BUNDLE}} and manually add it to your project, or, if you have already installed `{{PKG_NAME}}` in your project, just get the bundles from `node_modules/{{PKG_NAME}}/dist/bundles/`.
 
 If you feel comfortable with *my* choice for scrypt default parameters (`N=131072`, `r=8`, `p=1`), you can easily derive a key (or 'digest') of 256 bits (32 bytes) from a password and a random salt as:
 

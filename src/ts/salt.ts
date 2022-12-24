@@ -9,8 +9,7 @@ const salt = function (length: number = 16): ArrayBuffer {
 
   if (length === 0) return new ArrayBuffer(0)
 
-  if (IS_BROWSER) return crypto.getRandomValues(new Uint8Array(length)).buffer
-  else return require('crypto').randomBytes(length).buffer // eslint-disable-line
+  return crypto.getRandomValues(new Uint8Array(length)).buffer
 }
 
 export { salt }

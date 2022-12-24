@@ -1,5 +1,5 @@
 import * as bigintConversion from 'bigint-conversion'
-
+import * as _pkg from '#pkg'
 import vectors from '../test-vectors/scryptBlockMix'
 
 describe('testing scryptBlockMix', function () {

@@ -1,18 +1,21 @@
 'use strict'
 
-const resolve = require('@rollup/plugin-node-resolve').nodeResolve
-const replace = require('@rollup/plugin-replace')
-const { terser } = require('rollup-plugin-terser')
-const typescriptPlugin = require('@rollup/plugin-typescript')
-const commonjs = require('@rollup/plugin-commonjs')
+import inject from '@rollup/plugin-inject'
+import { nodeResolve as resolve } from '@rollup/plugin-node-resolve'
+import replace from '@rollup/plugin-replace'
+import { terser } from 'rollup-plugin-terser'
+import typescriptPlugin from '@rollup/plugin-typescript'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
 
-const path = require('path')
-const fs = require('fs')
-const pkgJson = require('../package.json')
+import { dirname, join } from 'path'
+import { existsSync } from 'fs-extra'
+import { browser, name as _name, exports } from '../package.json'
+import { compile } from './rollup-plugin-dts.js'
 
-const rootDir = path.join(__dirname, '..')
-const dstDir = path.join(rootDir, pkgJson.directories.dist)
-const srcDir = path.join(rootDir, 'src', 'ts')
+const rootDir = join(__dirname, '..')
+// const dstDir = join(rootDir, directories.dist)
+const srcDir = join(rootDir, 'src', 'ts')
 
 function camelise (str) {
   return str.replace(/-([a-z])/g,
@@ -22,30 +25,39 @@ function camelise (str) {
 }
 
 const regex = /^(?:(?<scope>@.*?)\/)?(?<name>.*)/ // We are going to take only the package name part if there is a scope, e.g. @my-org/package-name
-const { name } = pkgJson.name.match(regex).groups
+const { name } = _name.match(regex).groups
 const pkgCamelisedName = camelise(name)
 
-const input = path.join(srcDir, 'index.ts')
-if (fs.existsSync(input) !== true) throw new Error('The entry point should be index.ts')
+const input = join(srcDir, 'index.ts')
+if (existsSync(input) !== true) throw new Error('The entry point should be index.ts')
 
 const tsBundleOptions = {
+  tsconfig: join(rootDir, 'tsconfig.json'),
   outDir: undefined, // ignore outDir in tsconfig.json
-  exclude: ['test/**/*', 'src/**/*.spec.ts', './build/typings/global-this-pkg.d.ts']
+  include: ['src/ts/**/*', 'build/typings/is-browser.d.ts'],
+  exclude: ['src/**/*.spec.ts']
 }
-
-const external = [...Object.keys(pkgJson.dependencies || {}), ...Object.keys(pkgJson.peerDependencies || {})]
 
 const sourcemapOutputOptions = {
   sourcemap: 'inline',
   sourcemapExcludeSources: true
 }
 
-module.exports = [
-  { // ESM for browsers
+function compileDts () {
+  return {
+    name: 'compile-dts',
+    closeBundle () {
+      compile()
+    }
+  }
+}
+
+export default [
+  { // Browser ESM bundle
     input: input,
     output: [
       {
-        file: path.join(rootDir, pkgJson.exports['.'].default),
+        file: join(rootDir, browser),
         ...sourcemapOutputOptions,
         format: 'es'
       }
@@ -55,26 +67,30 @@ module.exports = [
         IS_BROWSER: true,
         preventAssignment: true
       }),
-      typescriptPlugin(tsBundleOptions)
-    ],
-    external
+      typescriptPlugin(tsBundleOptions),
+      commonjs({ extensions: ['.js', '.cjs', '.ts', '.jsx', '.cjsx', '.tsx'] }), // the ".ts" extension is required
+      json()
+    ]
   },
   { // Browser bundles
     input: input,
     output: [
       {
-        file: path.join(dstDir, `bundles/${name}.iife.js`),
+        file: join(rootDir, exports['./esm-browser-bundle']),
+        format: 'es',
+        plugins: [terser()]
+      },
+      {
+        file: join(rootDir, exports['./iife-browser-bundle']),
         format: 'iife',
-        name: pkgCamelisedName
+        name: pkgCamelisedName,
+        plugins: [terser()]
       },
       {
-        file: path.join(dstDir, `bundles/${name}.esm.js`),
-        format: 'es'
-      },
-      {
-        file: path.join(dstDir, `bundles/${name}.umd.js`),
+        file: join(rootDir, exports['./umd-browser-bundle']),
         format: 'umd',
-        name: pkgCamelisedName
+        name: pkgCamelisedName,
+        plugins: [terser()]
       }
     ],
     plugins: [
@@ -82,53 +98,79 @@ module.exports = [
         IS_BROWSER: true,
         preventAssignment: true
       }),
-      typescriptPlugin(tsBundleOptions),
-      resolve({
-        browser: true,
-        exportConditions: ['browser', 'module', 'import', 'default']
-      }),
-      terser()
-    ]
-  },
-  { // Node ESM with declaration files
-    input: input,
-    output: {
-      dir: path.join(rootDir, path.dirname(pkgJson.exports['.'].node.import)),
-      entryFileNames: path.basename(pkgJson.exports['.'].node.import),
-      ...sourcemapOutputOptions,
-      format: 'es'
-    },
-    plugins: [
-      replace({
-        IS_BROWSER: false,
-        preventAssignment: true
-      }),
       typescriptPlugin({
         ...tsBundleOptions,
-        declaration: true,
-        outDir: path.join(rootDir, path.dirname(pkgJson.exports['.'].node.import)),
-        declarationDir: path.join(rootDir, path.dirname(pkgJson.exports['.'].node.import), 'types'),
-        declarationMap: true
+        sourceMap: false
       }),
-      commonjs({ extensions: ['.js', '.ts'] }) // the ".ts" extension is required
-    ],
-    external
+      resolve({
+        browser: true,
+        exportConditions: ['browser', 'default'],
+        mainFields: ['browser', 'module', 'main']
+      }),
+      commonjs({ extensions: ['.js', '.cjs', '.ts', '.jsx', '.cjsx', '.tsx'] }), // the ".ts" extension is required
+      json()
+    ]
   },
   { // Node CJS
     input: input,
-    output: {
-      dir: path.join(rootDir, path.dirname(pkgJson.exports['.'].node.require)),
-      entryFileNames: path.basename(pkgJson.exports['.'].node.require),
-      ...sourcemapOutputOptions,
-      format: 'cjs'
-    },
+    output: [
+      {
+        file: join(rootDir, exports['.'].node.require),
+        ...sourcemapOutputOptions,
+        format: 'cjs',
+        exports: 'auto',
+        plugins: [
+          terser()
+        ]
+      }
+    ],
     plugins: [
       replace({
         IS_BROWSER: false,
         preventAssignment: true
       }),
+      inject({
+        crypto: 'crypto'
+      }),
       typescriptPlugin(tsBundleOptions),
-      commonjs({ extensions: ['.js', '.ts'] }) // the ".ts" extension is required
+      // resolve({
+      //   browser: false,
+      //   exportConditions: ['require', 'node', 'module', 'import']
+      // }),
+      commonjs({ extensions: ['.js', '.cjs', '.ts', '.jsx', '.cjsx', '.tsx'] }), // the ".ts" extension is required
+      json()
+    ]
+  },
+  { // Node ESM and type declarations
+    input: input,
+    output: [
+      {
+        file: join(rootDir, exports['.'].node.import),
+        ...sourcemapOutputOptions,
+        format: 'es',
+        plugins: [
+          terser()
+        ]
+      }
+    ],
+    plugins: [
+      replace({
+        IS_BROWSER: false,
+        __filename: `'${exports['.'].node.import}'`,
+        __dirname: `'${dirname(exports['.'].node.import)}'`,
+        preventAssignment: true
+      }),
+      inject({
+        crypto: 'crypto'
+      }),
+      typescriptPlugin(tsBundleOptions),
+      // resolve({
+      //   browser: false,
+      //   exportConditions: ['node']
+      // }),
+      compileDts(),
+      commonjs({ extensions: ['.js', '.cjs', '.ts', '.jsx', '.cjsx', '.tsx'] }), // the ".ts" extension is required
+      json()
     ]
   }
 ]
