@@ -39,7 +39,8 @@
     "forceConsistentCasingInFileNames": true,  /* Disallow inconsistently-cased references to the same file. */
     "resolveJsonModule": true,
     "paths": {
-      "#pkg": ["."]
+      "#pkg": ["."],
+      "#testvectors": ["./test-vectors"]
     }
   },
   "include": ["src/ts/**/*", "build/typings/**/*.d.ts", "test/**/*", "test-vectors/**/*.ts", "benchmark/**/*.ts"]

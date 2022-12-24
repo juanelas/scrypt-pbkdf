@@ -7,15 +7,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  node:
-    name: build and run tests in node.js
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: install
+        run: npm ci
+      
+      - name: build
+        run: npm run build
+
+      - name: coverage
+        run: npm run coverage
+
+  nodetests:
+    name: run tests and coverage for Node.js
+    needs: [build]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [16.x, 18.x]
       # When set to true, GitHub cancels all in-progress jobs if any matrix job fails.
-      fail-fast: true
+      fail-fast: false
       # The maximum number of jobs that can run simultaneously. Set to 1 if you can't run tests in parallel
       # max-parallel: 1
     steps:
@@ -36,13 +58,14 @@ jobs:
         #   VARIABLE1: ${{ secrets.VARIABLE1 }}
         #   VARIABLE2: ${{ secrets.VARIABLE2 }}
       
-      - name: node cjs tests with coverage
-        run: npm run coverage
+      - name: node cjs tests
+        run: npm run test:node-cjs
         # env:
         #   VARIABLE1: ${{ secrets.VARIABLE1 }}
         #   VARIABLE2: ${{ secrets.VARIABLE2 }}
 
-  browser:
+  browsertest:
+    needs: [build]
     name: tests in browser
     runs-on: ubuntu-latest
     steps:
@@ -64,7 +87,7 @@ jobs:
         #   VARIABLE2: ${{ secrets.VARIABLE2 }}
 
   publish:
-    needs: [node, browser]
+    needs: [nodetests, browsertests]
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -75,12 +98,6 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-
-      # - name: install
-      #   run: npm ci
-        
-      # - name: node cjs tests with coverage
-      #   run: npm run coverage
 
       - name: send report to coveralls.io
         uses: coverallsapp/github-action@master

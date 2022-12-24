@@ -40,6 +40,9 @@
     "#pkg": {
       "import": "./dist/esm/index.node.js",
       "require": "./dist/cjs/index.node.cjs"
+    },
+    "#testvectors": {
+      "import": "./test-vectors/index.js"
     }
   },
   "directories": {
@@ -132,6 +135,8 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.79.1",
     "rollup-plugin-terser": "^7.0.2",
+    "scrypt-js": "^3.0.1",
+    "scryptsy": "^2.1.0",
     "ts-standard": "^11.0.0",
     "tslib": "^2.3.1",
     "typedoc": "^0.23.0",

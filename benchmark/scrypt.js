@@ -1,14 +1,17 @@
-const scryptPbkdf = require('..')
-const scryptsy = require('scryptsy')
-const scryptjs = require('scrypt-js')
+import { scrypt } from '#pkg'
+import benchmark from 'benchmark'
+import { bufToText } from 'bigint-conversion'
+import crypto from 'crypto'
+import scryptJs from 'scrypt-js'
+import scryptsy from 'scryptsy'
 
-const bigintConversion = require('bigint-conversion')
+const { scrypt: _scrypt } = scryptJs
+const { Suite } = benchmark
 
-const Benchmark = require('benchmark')
+import vectors from '../test-vectors/scrypt.js'
+const tests = vectors.filter(val => (val.benchmark))
 
-const tests = require('../test-vectors/scrypt').filter(val => (val.benchmark))
-
-const suite = new Benchmark.Suite('scrypt')
+const suite = new Suite('scrypt')
 for (const test of tests) {
   // add tests
   let { P, S, N, r, p, dkLen } = test.input
@@ -18,21 +21,21 @@ for (const test of tests) {
   if (typeof S === 'string') {
     S = new TextEncoder().encode(S)
   }
-  const Pstr = bigintConversion.bufToText(P)
-  const Sstr = bigintConversion.bufToText(S)
+  const Pstr = bufToText(P)
+  const Sstr = bufToText(S)
   P = new Uint8Array(P)
   S = new Uint8Array(S)
   const testDataStr = JSON.stringify({ P: Pstr, S: Sstr, N, r, p, dkLen })
   suite.add(`\nInput: ${testDataStr} ${test.comment}\n  scrypt-pbkdf`, {
     defer: true,
     fn: function (deferred) {
-      scryptPbkdf.scrypt(P, S, dkLen, { N, r, p }).then(ret => deferred.resolve())
+      scrypt(P, S, dkLen, { N, r, p }).then(ret => deferred.resolve())
     }
   })
     .add('  scrypt-js', {
       defer: true,
       fn: function (deferred) {
-        scryptjs.scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
+        _scrypt(P, S, N, r, p, dkLen).then(ret => deferred.resolve())
       }
     })
     .add('  scryptsy', {
@@ -45,7 +48,7 @@ for (const test of tests) {
     suite.add('  Node\'s scrypt', {
       defer: true,
       fn: function (deferred) {
-        require('crypto').scrypt(P, S, dkLen, { N, r, p, maxmem: 256 * N * r },
+        crypto.scrypt(P, S, dkLen, { N, r, p, maxmem: 256 * N * r },
           (err, derivedKey) => {
             if (!err) deferred.resolve()
           }
@@ -53,7 +56,7 @@ for (const test of tests) {
       }
     })
       .add('  Node\'s scryptSync', function () {
-        require('crypto').scryptSync(P, S, dkLen, { N, r, p, maxmem: 256 * N * r })
+        crypto.scryptSync(P, S, dkLen, { N, r, p, maxmem: 256 * N * r })
       })
   }
 }
