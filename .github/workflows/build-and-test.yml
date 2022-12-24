@@ -64,7 +64,7 @@ jobs:
         #   VARIABLE1: ${{ secrets.VARIABLE1 }}
         #   VARIABLE2: ${{ secrets.VARIABLE2 }}
 
-  browsertest:
+  browsertests:
     needs: [build]
     name: tests in browser
     runs-on: ubuntu-latest
