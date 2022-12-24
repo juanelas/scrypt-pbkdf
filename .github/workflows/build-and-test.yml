@@ -1,4 +1,4 @@
-name: build, test (node and browser), publish to NPM
+name: build, test (node and browser), coverage, publish to NPM
 
 on:
   push:
@@ -18,15 +18,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+          registry-url: "https://registry.npmjs.org"
 
       - name: install
         run: npm ci
       
       - name: build
         run: npm run build
-
-      - name: coverage
-        run: npm run coverage
 
   nodetests:
     name: run tests and coverage for Node.js
@@ -48,6 +46,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+          registry-url: "https://registry.npmjs.org"
 
       - name: install
         run: npm ci
@@ -76,6 +75,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
+          registry-url: "https://registry.npmjs.org"
 
       - name: install
         run: npm ci
@@ -98,6 +98,9 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
+
+      - name: coverage
+        run: npm run coverage
 
       - name: send report to coveralls.io
         uses: coverallsapp/github-action@master
