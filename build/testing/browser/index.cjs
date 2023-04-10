@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer')
 const minimatch = require('minimatch')
 const glob = require('glob')
 const rootDir = path.join(__dirname, '../../..')
+const pkgJson = require(path.join(rootDir, 'package.json'))
 
 const browserTests = async (
   {
@@ -78,12 +79,15 @@ const browserTests = async (
 
 function processedTestFiles (testFilesStr) {
   if (testFilesStr === undefined) {
-    return undefined
+    testFilesStr = [pkgJson.directories.test + '/**/*.ts', pkgJson.directories.src + '/**/*.spec.ts']
+  } else {
+    // Let us first remove surrounding quotes in string (it gives issues in windows)
+    testFilesStr = testFilesStr.replace(/^['"]/, '').replace(/['"]$/, '')
   }
-  // Let us first remove surrounding quotes in string (it gives issues in windows)
-  testFilesStr = testFilesStr.replace(/^['"]/, '').replace(/['"]$/, '')
   const filenames = glob.sync(testFilesStr, { cwd: rootDir, matchBase: true })
-  if (filenames.length > 0) {
+  if (filenames.length === 0) {
+    throw new Error('no test files found for ' + testFilesStr)
+  } else {
     filenames.forEach(file => {
       const isTsTestFile = minimatch(file, '{test/**/*.ts,src/**/*.spec.ts}', { matchBase: true })
       if (!isTsTestFile) {

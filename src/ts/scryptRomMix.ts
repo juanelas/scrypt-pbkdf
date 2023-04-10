@@ -1,5 +1,5 @@
-import { scryptBlockMix } from './scryptBlockMix'
-import { typedArrayXor } from './typedArrayXor'
+import { scryptBlockMix } from './scryptBlockMix.js'
+import { typedArrayXor } from './typedArrayXor.js'
 
 /**
  * The scryptROMix algorithm

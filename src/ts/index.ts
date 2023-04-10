@@ -3,10 +3,9 @@
  *
  * @packageDocumentation
  */
-
-export * from './salsa208Core'
-export * from './scryptBlockMix'
-export * from './scryptRomMix'
-export * from './scrypt'
-export * from './salt'
-export * from './shared-types'
+export * from './salsa208Core.js'
+export * from './scryptBlockMix.js'
+export * from './scryptRomMix.js'
+export * from './scrypt.js'
+export * from './salt.js'
+export * from './shared-types.js'

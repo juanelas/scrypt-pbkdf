@@ -1,6 +1,6 @@
-import { scryptROMix } from './scryptRomMix'
+import { scryptROMix } from './scryptRomMix.js'
 import pbkdf2Hmac from 'pbkdf2-hmac'
-import { TypedArray } from './shared-types'
+import { TypedArray } from './shared-types.js'
 
 /**
  * scrypt configuration parameters
@@ -25,7 +25,7 @@ export interface ScryptParams {
  * @returns {ArrayBuffer} - a derived key of dKLen bytes
  */
 const scrypt = async function (P: string | ArrayBuffer | TypedArray | DataView, S: string | ArrayBuffer | TypedArray | DataView, dkLen: number, scryptParams?: ScryptParams): Promise<ArrayBuffer> {
-  if (typeof P === 'string') P = new TextEncoder().encode(P) // encode S as UTF-8
+  if (typeof P === 'string') P = new TextEncoder().encode(P) // encode P as UTF-8
   else if (P instanceof ArrayBuffer) P = new Uint8Array(P)
   else if (!ArrayBuffer.isView(P)) throw RangeError('P should be string, ArrayBuffer, TypedArray, DataView')
 
@@ -43,7 +43,7 @@ const scrypt = async function (P: string | ArrayBuffer | TypedArray | DataView, 
 
   if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75) throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.')
 
-  if (!IS_BROWSER) return (await import('crypto')).scryptSync(P as TypedArray, S as TypedArray, dkLen, { N, r, p, maxmem: 256 * N * r }).buffer
+  if (!IS_BROWSER) return (await import('crypto')).scryptSync(P as TypedArray, S as TypedArray, dkLen, { N, r, p, maxmem: 160 * N * r }).buffer
 
   /*
   1.  Initialize an array B consisting of p blocks of 128 * r octets each:

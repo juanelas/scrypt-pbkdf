@@ -1,5 +1,5 @@
-import { salsa208Core } from './salsa208Core'
-import { typedArrayXor } from './typedArrayXor'
+import { salsa208Core } from './salsa208Core.js'
+import { typedArrayXor } from './typedArrayXor.js'
 
 /**
  * The scryptBlockMix algorithm is the same as the BlockMix algorithm

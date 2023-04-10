@@ -1,4 +1,4 @@
-import { TypedArray } from './shared-types'
+import { TypedArray } from './shared-types.js'
 /**
  * XORs arr2 to arr1. Both must be the same type of TypedArray
  * @private
