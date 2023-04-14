@@ -49,7 +49,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: install
-        run: npm ci
+        run: npm i
 
       - name: node esm tests
         run: npm run test:node-esm

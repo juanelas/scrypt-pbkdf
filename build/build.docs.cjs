@@ -52,7 +52,7 @@ async function typedoc () {
 
   // If you want TypeDoc to load tsconfig.json / typedoc.json files
   app.options.addReader(new TypeDoc.TSConfigReader())
-  app.options.addReader(new TypeDoc.TypeDocReader())
+  // app.options.addReader(new TypeDoc.TypeDocReader())
 
   app.bootstrap({
     // typedoc options here

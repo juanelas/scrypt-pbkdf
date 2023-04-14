@@ -88,7 +88,7 @@ import * as scryptPbkdf from 'scrypt-pbkdf'
 > declare module 'scrypt-pbkdf/dist/esm/index.browser' // use the specific file you were importing
 > ```
 
-You can also download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/iife.js), the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/esm.min.js) or the [UMD bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundles/umd.js) and manually add it to your project, or, if you have already installed `scrypt-pbkdf` in your project, just get the bundles from `node_modules/scrypt-pbkdf/dist/bundles/`.
+You can also download the [IIFE bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundle.iife.js), the [ESM bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundle.esm.min.js) or the [UMD bundle](https://raw.githubusercontent.com/juanelas/scrypt-pbkdf/main/dist/bundle.umd.js) and manually add it to your project, or, if you have already installed `scrypt-pbkdf` in your project, just get the bundles from `node_modules/scrypt-pbkdf/dist/bundles/`.
 
 If you feel comfortable with *my* choice for scrypt default parameters (`N=131072`, `r=8`, `p=1`), you can easily derive a key (or 'digest') of 256 bits (32 bytes) from a password and a random salt as:
 

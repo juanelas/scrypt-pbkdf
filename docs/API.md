@@ -28,7 +28,7 @@ Scrypt password-based key derivation function (RFC 7914)
 
 #### Defined in
 
-[shared-types.ts:1](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/shared-types.ts#L1)
+[shared-types.ts:1](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/shared-types.ts#L1)
 
 ## Functions
 
@@ -55,7 +55,7 @@ This function modifies the ArrayBuffer of the input UInt32Array
 
 #### Defined in
 
-[salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/salsa208Core.ts#L12)
+[salsa208Core.ts:12](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/salsa208Core.ts#L12)
 
 ___
 
@@ -81,7 +81,7 @@ length must be integer >= 0
 
 #### Defined in
 
-[salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/salt.ts#L7)
+[salt.ts:7](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/salt.ts#L7)
 
 ___
 
@@ -108,7 +108,7 @@ The scrypt Algorithm (RFC 7914)
 
 #### Defined in
 
-[scrypt.ts:27](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/scrypt.ts#L27)
+[scrypt.ts:27](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/scrypt.ts#L27)
 
 ___
 
@@ -134,7 +134,7 @@ This function modifies the ArrayBuffer of the input BigUint64Array
 
 #### Defined in
 
-[scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/scryptBlockMix.ts#L17)
+[scryptBlockMix.ts:17](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/scryptBlockMix.ts#L17)
 
 ___
 
@@ -159,4 +159,4 @@ This function modifies the ArrayBuffer of the input array
 
 #### Defined in
 
-[scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/6094c12/src/ts/scryptRomMix.ts#L14)
+[scryptRomMix.ts:14](https://github.com/juanelas/scrypt-bigint/blob/953dbff/src/ts/scryptRomMix.ts#L14)

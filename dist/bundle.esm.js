@@ -98,101 +98,7 @@ const scryptROMix = function (B, N) {
     }
 };
 
-const HASHALGS = {
-    'SHA-1': { outputLength: 20, blockSize: 64 },
-    'SHA-256': { outputLength: 32, blockSize: 64 },
-    'SHA-384': { outputLength: 48, blockSize: 128 },
-    'SHA-512': { outputLength: 64, blockSize: 128 }
-};
-function pbkdf2Hmac(P, S, c, dkLen, hash = 'SHA-256') {
-    return new Promise((resolve, reject) => {
-        if (!(hash in HASHALGS)) {
-            reject(new RangeError(`Valid hash algorithm values are any of ${Object.keys(HASHALGS).toString()}`));
-        }
-        if (typeof P === 'string')
-            P = new TextEncoder().encode(P);
-        else if (P instanceof ArrayBuffer)
-            P = new Uint8Array(P);
-        else if (!ArrayBuffer.isView(P))
-            reject(RangeError('P should be string, ArrayBuffer, TypedArray, DataView'));
-        if (typeof S === 'string')
-            S = new TextEncoder().encode(S);
-        else if (S instanceof ArrayBuffer)
-            S = new Uint8Array(S);
-        else if (ArrayBuffer.isView(S))
-            S = new Uint8Array(S.buffer, S.byteOffset, S.byteLength);
-        else
-            reject(RangeError('S should be string, ArrayBuffer, TypedArray, DataView'));
-        {
-            crypto.subtle.importKey('raw', P, 'PBKDF2', false, ['deriveBits']).then((PKey) => {
-                const params = { name: 'PBKDF2', hash, salt: S, iterations: c };
-                crypto.subtle.deriveBits(params, PKey, dkLen * 8).then(derivedKey => resolve(derivedKey), err => {
-                    _pbkdf2(P, S, c, dkLen, hash).then(derivedKey => resolve(derivedKey), error => reject(error));
-                });
-            }, err => reject(err));
-        }
-    });
-}
-async function _pbkdf2(P, S, c, dkLen, hash) {
-    if (!(hash in HASHALGS)) {
-        throw new RangeError(`Valid hash algorithm values are any of ${Object.keys(HASHALGS).toString()}`);
-    }
-    if (!Number.isInteger(c) || c <= 0)
-        throw new RangeError('c must be a positive integer');
-    const hLen = HASHALGS[hash].outputLength;
-    if (!Number.isInteger(dkLen) || dkLen <= 0 || dkLen >= (2 ** 32 - 1) * hLen)
-        throw new RangeError('dkLen must be a positive integer < (2 ** 32 - 1) * hLen');
-    const l = Math.ceil(dkLen / hLen);
-    const r = dkLen - (l - 1) * hLen;
-    const T = new Array(l);
-    if (P.byteLength === 0)
-        P = new Uint8Array(HASHALGS[hash].blockSize);
-    const Pkey = await crypto.subtle.importKey('raw', P, {
-        name: 'HMAC',
-        hash: { name: hash }
-    }, true, ['sign']);
-    const HMAC = async function (key, arr) {
-        const hmac = await crypto.subtle.sign('HMAC', key, arr);
-        return new Uint8Array(hmac);
-    };
-    for (let i = 0; i < l; i++) {
-        T[i] = await F(Pkey, S, c, i + 1);
-    }
-    async function F(P, S, c, i) {
-        function INT(i) {
-            const buf = new ArrayBuffer(4);
-            const view = new DataView(buf);
-            view.setUint32(0, i, false);
-            return new Uint8Array(buf);
-        }
-        const Uacc = await HMAC(P, concat(S, INT(i)));
-        let UjMinus1 = Uacc;
-        for (let j = 1; j < c; j++) {
-            UjMinus1 = await HMAC(P, UjMinus1);
-            xorMe(Uacc, UjMinus1);
-        }
-        return Uacc;
-    }
-    T[l - 1] = T[l - 1].slice(0, r);
-    return concat(...T).buffer;
-}
-function concat(...arrs) {
-    const totalLength = arrs.reduce((acc, value) => acc + value.length, 0);
-    if (arrs.length === 0)
-        throw new RangeError('Cannot concat no arrays');
-    const result = new Uint8Array(totalLength);
-    let length = 0;
-    for (const array of arrs) {
-        result.set(array, length);
-        length += array.length;
-    }
-    return result;
-}
-function xorMe(arr1, arr2) {
-    for (let i = 0; i < arr1.length; i++) {
-        arr1[i] ^= arr2[i];
-    }
-}
+const e={"SHA-1":{outputLength:20,blockSize:64},"SHA-256":{outputLength:32,blockSize:64},"SHA-384":{outputLength:48,blockSize:128},"SHA-512":{outputLength:64,blockSize:128}};function t(t,a,o,i,s="SHA-256"){return new Promise(((u,c)=>{s in e||c(new RangeError(`Valid hash algorithm values are any of ${Object.keys(e).toString()}`)),"string"==typeof t?t=(new TextEncoder).encode(t):t instanceof ArrayBuffer?t=new Uint8Array(t):ArrayBuffer.isView(t)||c(RangeError("P should be string, ArrayBuffer, TypedArray, DataView")),"string"==typeof a?a=(new TextEncoder).encode(a):a instanceof ArrayBuffer?a=new Uint8Array(a):ArrayBuffer.isView(a)?a=new Uint8Array(a.buffer,a.byteOffset,a.byteLength):c(RangeError("S should be string, ArrayBuffer, TypedArray, DataView")),crypto.subtle.importKey("raw",t,"PBKDF2",!1,["deriveBits"]).then((f=>{const y={name:"PBKDF2",hash:s,salt:a,iterations:o};crypto.subtle.deriveBits(y,f,8*i).then((e=>u(e)),(f=>{(async function(t,a,o,i,s){if(!(s in e))throw new RangeError(`Valid hash algorithm values are any of ${Object.keys(e).toString()}`);if(!Number.isInteger(o)||o<=0)throw new RangeError("c must be a positive integer");const u=e[s].outputLength;if(!Number.isInteger(i)||i<=0||i>=(2**32-1)*u)throw new RangeError("dkLen must be a positive integer < (2 ** 32 - 1) * hLen");const c=Math.ceil(i/u),f=i-(c-1)*u,y=new Array(c);0===t.byteLength&&(t=new Uint8Array(e[s].blockSize));const w=await crypto.subtle.importKey("raw",t,{name:"HMAC",hash:{name:s}},!0,["sign"]),g=async function(e,t){const r=await crypto.subtle.sign("HMAC",e,t);return new Uint8Array(r)};for(let e=0;e<c;e++)y[e]=await h(w,a,o,e+1);async function h(e,t,a,o){function i(e){const t=new ArrayBuffer(4);return new DataView(t).setUint32(0,e,!1),new Uint8Array(t)}const s=await g(e,r(t,i(o)));let u=s;for(let t=1;t<a;t++)u=await g(e,u),n(s,u);return s}return y[c-1]=y[c-1].slice(0,f),r(...y).buffer})(t,a,o,i,s).then((e=>u(e)),(e=>c(e)));}));}),(e=>c(e)));}))}function r(...e){const t=e.reduce(((e,t)=>e+t.length),0);if(0===e.length)throw new RangeError("Cannot concat no arrays");const r=new Uint8Array(t);let n=0;for(const t of e)r.set(t,n),n+=t.length;return r}function n(e,t){for(let r=0;r<e.length;r++)e[r]^=t[r];}
 
 const scrypt = async function (P, S, dkLen, scryptParams) {
     if (typeof P === 'string')
@@ -216,7 +122,7 @@ const scrypt = async function (P, S, dkLen, scryptParams) {
         throw RangeError('N must be a power of 2');
     if (!Number.isInteger(r) || r <= 0 || !Number.isInteger(p) || p <= 0 || p * r > 1073741823.75)
         throw RangeError('Parallelization parameter p and blocksize parameter r must be positive integers satisfying p ≤ (2^32− 1) * hLen / MFLen where hLen is 32 and MFlen is 128 * r.');
-    const B = await pbkdf2Hmac(P, S, 1, p * 128 * r);
+    const B = await t(P, S, 1, p * 128 * r);
     const B32 = new Uint32Array(B);
     for (let i = 0; i < p; i++) {
         const blockLength32 = 32 * r;
@@ -227,7 +133,7 @@ const scrypt = async function (P, S, dkLen, scryptParams) {
             B32[offset + j] = Bi[j];
         }
     }
-    const DK = await pbkdf2Hmac(P, B32, 1, dkLen);
+    const DK = await t(P, B32, 1, dkLen);
     return DK;
 };
 
