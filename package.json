@@ -57,7 +57,7 @@
         "default": "./dist/index.node.esm.js"
       },
       "default": {
-        "types": "./dist/esm/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.browser.esm.js"
       }
     }
